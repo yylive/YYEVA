@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link href="src/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="src/css/main.css" rel="stylesheet" type="text/css" />
+    <script src="src/assets/jquery.min.js"></script>
+    <script src="src/assets/jquery.SuperSlide.2.1.1.js"></script>
+
+</head>
+
+
+<script type="text/javascript" src="./src/helpers/CSInterface.js"></script>
+<script type="text/javascript" src="./src/helpers/CSInterfaceHelper.js"></script>
+
+
+<script type="text/javascript" src="js/app.js"></script>
+
+
+<script type="text/javascript">
+    loadJSX("transform.jsx");
+    loadJSX("utils.jsx");
+    function alertMessage(message) {
+        csInterface.evalScript("alertMessage('" + message + "');");
+    }
+</script>
+
+<body>
+    <script src="/demos/googlegg.js"></script>
+
+    <div id="ae_ver_text">插件版本</div>
+
+    <span class="normal_text">文档说明：</span>
+    <span id="ae_help_h5" class="normal_text">https://docs.qq.com/doc/DWnpXUnNTeFB1UGND</span>
+    <button onclick="copyText()">复制链接</button>
+
+
+    <script type="text/javascript">
+        function copyText() {
+            var copyText = document.getElementById("ae_help_h5");
+            var textArea = document.createElement("textarea");
+            textArea.value = copyText.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("Copy");
+            textArea.remove();
+        }
+    </script>
+
+    <div class="set-content">
+        <!--    <div style="height: 40px;"></div>-->
+        <div class="set-title hd">
+            <ul class="clearfix">
+                <li class="on">264/265</li>
+                <li>Dynamic</li>
+                <li>导出日志</li>
+                <li>预览</li>
+            </ul>
+        </div>
+        <div class="set-middle bd">
+            <ul class="set-middle-item">
+                <li>
+                    <!-- Noraml H264 -->
+                    <div role="tabpanel" class="tab-pane fade in active" id="Section1">
+                        <img id="descImg" src='src/img/icon_h264.png' />
+                        <div />
+                        <button id="selectPath_normal" onclick="selectPath_normal()">选择路径</button>
+                        <b id="outputtext">264、265输出路径为：</b>
+                        <b id="pathtext_normal">未设置</b>
+                        <br />
+                        <br />
+
+                        <div id='outputtext'>档次选择</div>
+                        <button class="lowLevelButton" onclick="selectLevel(0)">低</button>
+                        <button class="midLevelButton" onclick="selectLevel(1)">中</button>
+                        <button class="highLevelButton" onclick="selectLevel(2)">高</button>
+                        <button class="customerButton" onclick="selectLevel(3)">自定义crf</button>
+                        <input  type="number" id="customerCRFInput_normal" class="customerCRFInput" value="23" step="1" min="0" max="51"></input>
+                        <br />
+                        <br />
+                        <button id="converterBtn" onclick="startConvert_normal()">开始转换</button>
+                    </div>
+                </li>
+            </ul>
+            <ul class="set-middle-item">
+                <li>
+                    <!-- Dynamic MP4 -->
+                    <div role="tabpanel" class="tab-pane fade" id="Section2">
+                        <img id="descImg" src='src/img/dynamic.png' />
+                        <div />
+                        <button id="selectPath_dynamic" onclick="selectPath_dynamic()">选择路径</button>
+                        <b id="outputtext">动态资源导出路径为：</b>
+                        <b id="pathtext_dynamic">未设置</b>
+                        <br />
+                        <br />
+
+                        <div id='outputtext'>档次选择</div>
+                        <button class="lowLevelButton" onclick="selectLevel(0)">低</button>
+                        <button class="midLevelButton" onclick="selectLevel(1)">中</button>
+                        <button class="highLevelButton" onclick="selectLevel(2)">高</button>
+                        <button class="customerButton" onclick="selectLevel(3)">自定义crf</button>
+                        <input  type="number" id="customerCRFInput_dynamic" class="customerCRFInput" value="23" step="1" min="0" max="51"></input>
+                        <br />
+                        <br />
+
+                        <button id="converterBtn" onclick="startConvert()">开始转换</button>
+                    </div>
+                </li>
+            </ul>
+                     <ul class="set-middle-item">
+                <li>
+                    <button id="selectPath_dynamic" onclick="selectLogPath()">选择路径</button>
+                    <b id="outputtext">日志导出路径为：</b>
+                    <b id="pathLogText">未设置</b>
+                    <br />
+                    <br />
+                    <b id="outputLogtext">注：每一个AE资源都对应有一个插件日志目录，请确保当前打开的项目为所需日志的项目</b>
+                    <br />
+                    <br />
+                    <button id="converterBtn" onclick="startOutputLog()">一键导出</button>
+                </li>
+           </ul>
+           <ul class="set-middle-item">
+                <li>
+                <div role="tabpanel" class="tab-pane fade in active" id="Section4">
+                    <iframe scrolling="auto" style="position: absolute; width: 97%; height: 85%;" src="preview.html"></iframe>
+                </div>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div id="modal-data">
+            <p id="transform-tips">转换中...</p>
+            <br />
+            <p>转换过程中千万别切换合成！！！</p>
+        </div>
+    </div>
+
+    <div id="modal-log-overlay">
+        <div id="modal-data">
+            <p id="transform-tips">导出中...</p>
+            <br />
+            <p>大约需要一分钟，请耐心等待</p>
+        </div>
+    </div>
+
+    <script>
+        jQuery(".set-content").slide({
+            autoPlay: false, trigger: "click", delayTime: 700, pnLoop: false, startFun: function () {
+                cleanProject();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

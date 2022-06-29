@@ -1,0 +1,19 @@
+{
+  "name": "com.yy.aeconverterformp4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node js/app.js"
+  },
+  "keywords": [],
+  "author": "Guoyabin",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.9",
+    "buffer": "^6.0.3",
+    "jdataview": "^2.5.0",
+    "zlib": "^1.0.5"
+  }
+}

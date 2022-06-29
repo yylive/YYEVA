@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<ExtensionManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="6.0" ExtensionBundleId="com.yy.aeconverterformp4" ExtensionBundleVersion="2.1.0" ExtensionBundleName="MP4Conveter">
+    <ExtensionList>
+        <Extension Id="com.yy.aeconverterformp4" Version="2.1.0"/>
+    </ExtensionList>
+    <ExecutionEnvironment>
+        <HostList> 
+            <!--支持的宿主应用列表和版本-->
+            <Host Name="AEFT" Version="[13.0,99.9]" />
+            <Host Name="AEFX" Version="[13.0,99.9]" />  
+        </HostList>
+        <LocaleList>
+            <Locale Code="All"/>
+        </LocaleList>
+        <RequiredRuntimeList>
+            <RequiredRuntime Name="CSXS" Version="6.0"/>
+        </RequiredRuntimeList>
+    </ExecutionEnvironment>
+    <DispatchInfoList>
+        <Extension Id="com.yy.aeconverterformp4">
+            <DispatchInfo>
+                <Resources>
+                    <MainPath>./index.html</MainPath>
+                    <!--静态引入jsx文件 也可以动态引入  #include -->
+                    <ScriptPath>./jsx/host.jsx</ScriptPath>
+                    <CEFCommandLine>
+                        <Parameter>--enable-nodejs</Parameter>
+                        <Parameter>--mixed-context</Parameter>
+                    </CEFCommandLine>
+                </Resources>
+                <Lifecycle>
+                    <!-- 设置扩展面板为可视 -->
+                    <AutoVisible>true</AutoVisible>
+                    <!--<StartOn></StartOn>-->
+                    <!-- 打开程序的时候自启动插件 -->
+                </Lifecycle>
+                <UI>
+                    <Type>Panel</Type> <!-- 设置扩展显示为面板模式-->
+                    <Menu>YY-MP4转换</Menu> <!-- 设置扩展标题-->
+                    <Geometry>
+                        <!-- 设置面板尺寸 -->
+                        <Size>
+                            <Width>300</Width>
+                            <Height>300</Height>
+                        </Size> 
+                    </Geometry>
+                    <Icons/>
+                </UI>
+            </DispatchInfo>
+        </Extension>
+    </DispatchInfoList>
+</ExtensionManifest>
