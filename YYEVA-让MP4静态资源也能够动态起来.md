@@ -161,6 +161,10 @@
   #### 3. 根据Json数据和渲染帧数据，并结合传入的业务数据，完成上屏操作
   
   ![img](./img/render_mobile.png)
+  
+## 性能数据 
+
+    ![img](./img/cpugpuforios.png)
  
 ## Json 数据结构定义
 
