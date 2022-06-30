@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html" charset="UTF-8">
     <link href="src/css/style.css" rel="stylesheet" type="text/css" />
     <link href="src/css/main.css" rel="stylesheet" type="text/css" />
     <script src="src/assets/jquery.min.js"></script>
@@ -26,16 +26,11 @@
     }
 </script>
 
-<body>
+<body >
     <script src="/demos/googlegg.js"></script>
 
-    <div id="ae_ver_text">插件版本</div>
-
-    <span class="normal_text">文档说明：</span>
-    <span id="ae_help_h5" class="normal_text">https://docs.qq.com/doc/DWnpXUnNTeFB1UGND</span>
-    <button onclick="copyText()">复制链接</button>
-
-
+    <!-- <div id="ae_ver_text">插件版本</div> -->
+   
     <script type="text/javascript">
         function copyText() {
             var copyText = document.getElementById("ae_help_h5");
@@ -52,7 +47,7 @@
         <!--    <div style="height: 40px;"></div>-->
         <div class="set-title hd">
             <ul class="clearfix">
-                <li class="on">264/265</li>
+                <li class="on">MP4导出工具</li>
                 <li>Dynamic</li>
                 <li>导出日志</li>
                 <li>预览</li>
@@ -62,9 +57,9 @@
             <ul class="set-middle-item">
                 <li>
                     <!-- Noraml H264 -->
-                    <div role="tabpanel" class="tab-pane fade in active" id="Section1">
-                        <img id="descImg" src='src/img/icon_h264.png' />
-                        <div />
+                    <div role="tabpanel" class="tab-pane fade in active" id="Section1"> 
+                        <div /> 
+                        <br /> 
                         <button id="selectPath_normal" onclick="selectPath_normal()">选择路径</button>
                         <b id="outputtext">264、265输出路径为：</b>
                         <b id="pathtext_normal">未设置</b>
@@ -87,8 +82,8 @@
                 <li>
                     <!-- Dynamic MP4 -->
                     <div role="tabpanel" class="tab-pane fade" id="Section2">
-                        <img id="descImg" src='src/img/dynamic.png' />
-                        <div />
+                        
+                        <br /> 
                         <button id="selectPath_dynamic" onclick="selectPath_dynamic()">选择路径</button>
                         <b id="outputtext">动态资源导出路径为：</b>
                         <b id="pathtext_dynamic">未设置</b>
@@ -110,6 +105,7 @@
             </ul>
                      <ul class="set-middle-item">
                 <li>
+                    <br /> 
                     <button id="selectPath_dynamic" onclick="selectLogPath()">选择路径</button>
                     <b id="outputtext">日志导出路径为：</b>
                     <b id="pathLogText">未设置</b>
@@ -124,6 +120,7 @@
            <ul class="set-middle-item">
                 <li>
                 <div role="tabpanel" class="tab-pane fade in active" id="Section4">
+                    <br /> 
                     <iframe scrolling="auto" style="position: absolute; width: 97%; height: 85%;" src="preview.html"></iframe>
                 </div>
                 </li>

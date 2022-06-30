@@ -5,7 +5,7 @@ body{
 	font-size: 1.05em;
 	font-family: "Microsoft YaHei","����","Segoe UI", "Lucida Grande", Helvetica, Arial,sans-serif, FreeSans, Arimo;
 }
-a{color: #2fa0ec;outline: none;text-decoration: none;}
+a{color: rgb(54, 54, 54);outline: none;text-decoration: none;}
 a:hover,a:focus{color:#74777b;text-decoration: none;}
 
 .tab{
@@ -20,7 +20,7 @@ a:hover,a:focus{color:#74777b;text-decoration: none;}
     border:1px solid #ededed;
     border-top: 2px solid #ededed;
     border-right: 0px none;
-    background: #7a81f4;
+    background: rgb(54, 54, 54);
     color:#fff;
     border-radius: 0px;
     margin-right: 0px;
@@ -30,7 +30,7 @@ a:hover,a:focus{color:#74777b;text-decoration: none;}
 .nav-tabs li a:hover{
     border-bottom-color: #ededed;
     border-right: 0px none;
-    background: #00b0ad;
+    background: rgb(54, 54, 54);
     color: #fff;
 }
 .nav-tabs li a i{
@@ -44,7 +44,7 @@ a:hover,a:focus{color:#74777b;text-decoration: none;}
 .nav-tabs li.active a,
 .nav-tabs li.active a:focus,
 .nav-tabs li.active a:hover{
-    border-top: 3px solid #00b0ad;
+    border-top: 3px solid rgb(54, 54, 54);
     border-right: 1px solid #d3d3d3;
     margin-top: -15px;
     color: #444;
@@ -152,14 +152,13 @@ a:hover {
 
 /* 必要布局样式css */
 body{
-    background: #545b79 url(../images/body.jpg) center center no-repeat;
+    background: rgb(73, 73, 73)  ;
     background-size: cover;
     overflow:hidden;
+    height: 100%;
 }
 .set-content{
-    height: 100%;
-    width: 100%;
-    margin:0 auto;
+    height: 100%;   
 }
 
 .set-title {
@@ -179,19 +178,19 @@ body{
     position: static;
     background: rgba(255,255,255,.1);
     box-sizing: border-box;
-    border-right: solid 1px #785e9b;
+    border-right: solid 1px rgb(73, 73, 73);
     cursor: pointer;
     width: 97px;
     cursor:pointer;
 }
 
 .set-title ul .on{
-    background: #7dbac9;
+    background: rgb(54, 54, 54);
 }
 
 .set-middle{
-    background: -webkit-linear-gradient(top,rgba(126,187,201,1) 0,rgba(44,194,195,.9) 70%,rgba(44,194,195,.6) 100%);
-    height: 376px;
+    background: -webkit-linear-gradient(top,rgb(54, 54, 54) 0,rgb(54, 54, 54) 70%,rgb(54, 54, 54) 100%);
+    height: 100%;
     box-sizing: border-box;
     overflow: hidden;
     padding: 15px 17px 0 19px;
@@ -213,7 +212,7 @@ body{
     font-size: 13px;
     height: 43px;
     line-height: 43px;
-    border-bottom: solid 1px #4fc0c8;
+    border-bottom: solid 1px rgb(54, 54, 54);
     cursor: pointer;
     box-sizing: border-box;
     padding: 0 5px 0 2px;

@@ -310,8 +310,8 @@ function selectLevel(level) {
 
 function needActiveAllSelectLevel(levels,isActive) {
 
-    var backgroundColor = isActive ? "aquamarine" : "gray";
-    var color = isActive ?  "black" : "white";
+    var backgroundColor = isActive ? "#1473E6" : "#232323";
+    var color = isActive ? "white" : "#8A8A8A" ;
 
     for (var i = 0;i<levels.length;i++) {
         var level = levels[i]
