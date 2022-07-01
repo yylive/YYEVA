@@ -15,8 +15,18 @@
 + 资源制作的AE插件使用规范 [详情](https://github.com/yylive/YYEVA/tree/master/AEP)
 + 数据结构定义 [详情](https://github.com/yylive/YYEVA/blob/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md)
 + 项目相关文章、设计规范等 [详情](https://github.com/yylive/YYEVA)
-   
+ 
+## 相关文档介绍
+
+* [第一篇:直播间礼物动效 - 实现方案](./直播间礼物动效实现方案.md)
+* [第二篇:透明MP4礼物](./透明MP4礼物.md)
+* [第三篇:变换矩阵在动画上一些应用](./变换矩阵在动画上一些应用.md)
+* [第四篇:YYEVA , 让MP4静态资源也能够动态起来](./YYEVA-让MP4静态资源也能够动态起来.md)
+* [第五篇:YYEVA设计规范](./YYEVA设计规范.md)
+* [第六篇:YYEVA数据结构](./数据结构.md)
+
 
 ## 目录介绍 
 
-* [插件源码和工程文件](./AEP)
+* [AEP](./AEP)
+* [插件安装包](./AEP/build/2.1.0) 
