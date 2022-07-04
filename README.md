@@ -8,7 +8,6 @@
   
   <img src="https://github.com/yylive/YYEVA/blob/main/img/teampk.gif" width = "424" height = "898" alt="图片名称" align=center />
  
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/manhua.gif" width = "424" height = "898" alt="图片名称" align=center />
   
 ## 平台支持
 
