@@ -295,10 +295,7 @@ var DynamicMp4Conveter = (function() {
 
         logMessage("mergeLayer complete")
 
-        var src = [];
-        for (var k in sourceInfos) {
-            src.push(sourceInfos[k]);
-        }
+     
 
         var scale = outputInfo.scale;
         var scaleX = (scale.scaleX); //取整
@@ -310,7 +307,24 @@ var DynamicMp4Conveter = (function() {
         var outputWidth = compoItem.width * 0.5 * (1 + scaleX);
         var outputHeight = compoItem.height * 0.5 * (1 + scaleY);
 
-
+        //处理第一帧的宽高
+        var src = [];
+        for (var k in sourceInfos) {
+            var sourceRes = sourceInfos[k] 
+            var tempSourceId = sourceRes["effectId"]
+            var  tempFrame = outputInfo.mergeLayerInfos.frame
+            var tempDatas = tempFrame[0]["data"]
+            for (var j = 0 ; j < tempDatas.length  ; j++) {
+                var tempData =  tempDatas[j]
+                if(tempData["effectId"] == tempSourceId) {
+                    sourceRes["effectWidth"] =  tempData["renderFrame"][2] 
+                    sourceRes["effectHeight"] =  tempData["renderFrame"][3]
+                    break
+                }
+            }
+           
+            src.push(sourceRes);
+        }
 
 
         //找到最接近16的倍数的整数
