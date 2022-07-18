@@ -4,14 +4,20 @@
   
   对比传统的序列帧的动画播放方式，具有更高的压缩率，硬解码效率更高的优点，同时支持插入动态的业务元素；对比SVGA、Lottie等播放器，支持更多的特效支持，如复杂3D效果、描边、粒子效果等，达到所见即所得的效果。
   
-  ## 效果演示
+  该方案是在透明MP4动效解决方案的基础上，做了进一步扩充，让静态的MP4资源，也能够支持插入动态的元素，关于透明MP4的相关介绍，请点击 [第二篇:透明MP4礼物](./透明MP4礼物.md) 查看相关介绍。
+  
+## 效果演示
   
   <img src="https://github.com/yylive/YYEVA/blob/main/img/teampk.gif" width = "424" height = "898" alt="图片名称" align=center />
+  
+## YYEVA工具链资源输出流程
+
+  <img src="https://yyeva_timeline" width = "634" height = "322" alt="图片名称" align=center />
  
   
 ## 平台支持
 
-+ 支持 [Android](https://github.com/yylive/YYEVA-Android)、[IOS](https://github.com/yylive/YYEVA-iOS)、[Web](https://github.com/yylive/YYEVA-Web)、百度小程序  点击了解详细接入   
++ 支持 [Android](https://github.com/yylive/YYEVA-Android)、[IOS](https://github.com/yylive/YYEVA-iOS)、[Web](https://github.com/yylive/YYEVA-Web) 点击了解详细接入   
 + 资源制作的AE插件使用规范 [详情](https://github.com/yylive/YYEVA/tree/main/AEP)
 + 数据结构定义 [详情](https://github.com/yylive/YYEVA/blob/main/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md)
 + 项目相关文章、设计规范等 [详情](https://github.com/yylive/YYEVA)
