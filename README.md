@@ -12,7 +12,7 @@
   
 ## YYEVA工具链资源输出流程
 
-  <img src="https://yyeva_timeline" width = "634" height = "322" alt="图片名称" align=center />
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/yyeva_timeline.png" width = "634" height = "322" alt="图片名称" align=center />
  
   
 ## 平台支持
