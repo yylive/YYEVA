@@ -10,7 +10,12 @@
   
   <img src="https://github.com/yylive/YYEVA/blob/main/img/teampk.gif" width = "424" height = "898" alt="图片名称" align=center />
   
-## YYEVA工具链资源输出流程
+## YYEVA工具链 工作流程
+
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/ae_timeline.png" width = "754" height = "369" alt="图片名称" align=center />
+    
+
+## YYEVA渲染 工作流程
 
   <img src="https://github.com/yylive/YYEVA/blob/main/img/yyeva_timeline.png" width = "634" height = "322" alt="图片名称" align=center />
  
