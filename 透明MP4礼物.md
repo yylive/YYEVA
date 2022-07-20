@@ -1,43 +1,61 @@
-# YYEVA
+# YY透明MP4礼物
 
-  YYEVA（YY Effect Video Animate）是一个开源的支持可插入动态元素的MP4动效播放器解决方案，包含设计资源输出的AE插件，客户端渲染引擎，在线预览工具。
-  
-  对比传统的序列帧的动画播放方式，具有更高的压缩率，硬解码效率更高的优点，同时支持插入动态的业务元素；对比SVGA、Lottie等播放器，支持更多的特效支持，如复杂3D效果、描边、粒子效果等，达到所见即所得的效果。
-  
-  该方案是在透明MP4动效解决方案的基础上，做了进一步扩充，让静态的MP4资源，也能够支持插入动态的元素，关于透明MP4的相关介绍，请点击 [第二篇:透明MP4礼物](./透明MP4礼物.md) 查看相关介绍。
-  
-## 效果演示
-  
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/teampk.gif" width = "424" height = "898" alt="图片名称" align=center />
-  
-## YYEVA工具链 工作流程
+本章是对目前直播行业比较成熟的播放透明MP4礼物实现方案的一些理解，内容全部来自个人对整个工具链的认识，如果有理解不到位的地方，希望可以在评论区和我一起探讨。
 
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/ae_timeline.png" width = "754" height = "369" alt="图片名称" align=center />
-    
 
-## YYEVA渲染 工作流程
+## 1.MP4的简单理解
 
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/yyeva_timeline.png" width = "634" height = "322" alt="图片名称" align=center />
+MP4是一种流媒体的封装格式，内部常使用 avc作为视频轨道的编码方式，aac作为音频轨道的编码方式，在编码avc的时候，使用的颜色采样标准是YUV，YUV是一种色度+亮度的颜色采样格式，可以通过公式转换成RGB。
+
+```js
+ MP4 = (Video Track) + (Audio Track) + (Other Track)
+```
+
+具体MP4的一些概念，大家可以自行去google查询相关资料，本章就不重点论述了。之后有时间，再写一遍文章来展开谈这部分相关概念，
+
+
+## 2. MP4礼物特效
+
+对于设计师来说，MP4礼物特效，是一种所见即所得的动画方案，充分解放设计师的思想，能够支持所有设计师能设计出来的动画，包括3D动效等。并且充分利用了avc的高压缩率的优点，在客户端解码的时候，使用硬解充分发挥GPU的能力，减轻CPU的压力。是一种很好的动画实现方案。但是，由于使用YUV颜色采样标准，因此不具备alpha通道，在播放全屏礼物的时候，会遮盖住整个屏幕，这对于产品来说，是不可接受的。
+
+
+## 3.透明MP4礼物特效
+
+早在去年的时候，各大直播软件 就推出全屏的MP4礼物动效，作者也通过分析sandbox的方式，发现抖音，YY等app也是通过透明MP4礼物特效的方案，来实现全屏MP4礼物。各个公司实现的技术方案都大同小异，只是 rgb+alpha区域的位置排放有所不同而已。下面我们以AE作为资源导出工具，从设计侧的资源输出和客户端测的渲染 2个方面，来对该方案做个简单的介绍。
+
+### 3.1 效果演示
  
-  
-## 平台支持
-
-+ 支持 [Android](https://github.com/yylive/YYEVA-Android)、[IOS](https://github.com/yylive/YYEVA-iOS)、[Web](https://github.com/yylive/YYEVA-Web) 点击了解详细接入   
-+ 资源制作的AE插件使用规范 [详情](https://github.com/yylive/YYEVA/tree/main/AEP)
-+ 数据结构定义 [详情](https://github.com/yylive/YYEVA/blob/main/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md)
-+ 项目相关文章、设计规范等 [详情](https://github.com/yylive/YYEVA)
+ <img src="./img/normal_alpha_mp4.gif" width = "444" height = "960" alt="图片名称" align=center />
  
-## 相关文档介绍
+   
 
-* [第一篇:直播间礼物动效 - 实现方案](./直播间礼物动效实现方案.md)
-* [第二篇:透明MP4礼物](./透明MP4礼物.md)
-* [第三篇:变换矩阵在动画上一些应用](./变换矩阵在动画上一些应用.md)
-* [第四篇:YYEVA , 让MP4静态资源也能够动态起来](./YYEVA-让MP4静态资源也能够动态起来.md)
-* [第五篇:YYEVA设计规范](./YYEVA设计规范.md)
-* [第六篇:YYEVA数据结构](./数据结构.md)
+### 3.2 资源输出
+
+设计侧在使用AE制作完特效后，导出的渲染队列是一个如下图的MP4视频，该视频在全屏播放的时候，整个直播间背景都会遮盖住，体验不好。
+
+<img src="./img/normal.gif" width = "450" height = "500" alt="图片名称" align=center />
+
+设计侧制作的透明MP4特效：导出的渲染队列是一个如下图的MP4视频，该视频在全屏播放的时候，整个直播间背景不会遮盖住，体验很好。
+
+<img src="./img/blend_alpha.gif" width = "900" height = "500" alt="图片名称" align=center />
+
+右边图层，就是左边图层的有像素值的地方为非黑色，无像素值即黑色的地方为黑色生成的一个图层。
+所以输出的第二个视频就可以使普通MP4在渲染的时候，具备透明的效果，因为右边的区域值保存了左边区域的alpha通道。
 
 
-## 目录介绍 
+### 3.3 MP4+Alpha混合原理
 
-* [AEP](./AEP)
-* [插件安装包](./AEP/build/2.1.0) 
+![img](./img/rgb+alpha_blend.png)
+ 
+如上图所示，源素材向右扩充了一倍的像素，用来存储Alpha通道的数值，在客户端渲染的时候，直接使用右侧像素点的R值，除以255，就得到了0-1之间的alpha取值 
+例如第一个像素点， 红色：右侧的RGB值为(255,0,0) + 左侧的R值(128) ，混合之后的 RGBA = (255,0,0,128/255) ~= (255,0,0,0.5)
+
+
+### 3.4 客户端渲染
+
+客户端拿到视频轨道数据后，解码出每一帧图片，然后通过左边yuv+右边的yuv混合后再上屏，gl公式可理解为
+
+```js
+gl_FragColor = vec4( 
+texture2D(texture, vec2(vUv.x/2, vUv.y)).rgb, texture2D(texture, vec2(0.5 + vUv.x/2, vUv.y)).r );
+```
