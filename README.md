@@ -41,3 +41,12 @@
 
 * [AEP](./AEP)
 * [插件安装包](./AEP/build/2.1.0) 
+
+
+## 已接入APP
+
+ <img src="https://github.com/yylive/YYEVA/blob/main/img/jieru.png" width = "386" height = "311" alt="图片名称" align=center />
+ 
+
+
+
