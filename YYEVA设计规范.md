@@ -21,7 +21,7 @@
 ###  插件安装
 
  1. 下载 [zxp插件安装工具](https://aescripts.com/learn/zxp-installer/) 
- 2. 下载 [`YYEVA插件`](./AEP/build/2.7.0/YYYSMP4Conveter.zxp) 插件，并通过 `ZXP` 安装工具安装插件   
+ 2. 下载 [`YYEVA插件`](./AEP/build/2.1.1/YYYSMP4Conveter.zxp) 插件，并通过 `ZXP` 安装工具安装插件   
  3. 检查插件是否安装成功
  4. 重启 AE，选择 窗口 -》 扩展 -》 检查是否 多出一个  YY-MP4转换  项 
  
