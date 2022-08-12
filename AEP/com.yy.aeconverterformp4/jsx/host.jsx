@@ -347,7 +347,8 @@ var DynamicMp4Conveter = (function() {
                 "version": AE_Extension_Version,
                 "rgbFrame": [0, 0, width * 0.5, height],
                 "alphaFrame": [width * 0.5, 0, width * 0.25, height * 0.5],
-                "fps":this.proj.frameRate
+                "fps":this.proj.frameRate,
+                "hasAudio":this.activeItem.hasAudio
             },
             "effect": src,
             "datas": mergeLayerInfos.frame,
@@ -473,6 +474,7 @@ var DynamicMp4Conveter = (function() {
                     continue;
                 }
 
+                copyLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE
 
                 var position = copyLayer.property("ADBE Transform Group").property("ADBE Position");
 
