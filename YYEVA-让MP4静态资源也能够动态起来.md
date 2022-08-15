@@ -58,13 +58,13 @@
 #### 2. 转换前的准备工作
 
 插件在进行转换前，会检测所选图层的合法性。主要是检测：
-*  所选合成是否包含透明区域图层，因为我们目前开发的插件是在透明`MP4`礼物的基础上做的一个扩充，所以源素材必须是一个透明`MP4`资源。
+*  所选合成是否包含透明区域图层，因为我们目前开发的插件是在透明`MP4`资源的基础上做的一个扩充，所以源素材必须是一个透明`MP4`资源。
 *  所选合成是否包含`Mask`遮罩区域；`YYEVA`插件设计规范有介绍，
    * 文字遮罩区域是以 `mask_text` 作为合成的`name` 
-   * 图片遮罩区域是以mask_image作为合成的name
+   * 图片遮罩区域是以 `mask_image`作为合成的`name`
    
    如果都不包含两者，插件认为无需进行混合MP4的转换。
-*  检查AE是否包含 `YYConverterMP4` 模板，如果不包含，请参考 `YYEVA` 插件设计规范 进行模板配置，该步骤是为了扩充AE转换MP4的能力，进行一些渲染队列的相关配置。
+*  检查AE是否包含 `YYConverterMP4` 模板，如果不包含，请参考 [工具安装和环境搭建](https://github.com/yylive/YYEVA/blob/main/工具安装和环境搭建.md)进行模板配置，该步骤是为了扩充AE转换MP4的能力，进行一些渲染队列的相关配置。
 
 #### 3. 分析、处理设计师的图层相关数据
 
@@ -125,7 +125,7 @@
   * 计算出拷贝后的mask图层的位置 mask_Frame ，并记录下来
   * 更新 beginX 和 beginY 和 maxWidth 及 maxHeight
 
-***针对每一个`Mask`图层应用了上面的操作后，我们可以得到又一个关键的数据`outputFrame`,即`Mask`每一帧在输出上的位置数据***
+***针对每一个`Mask`图层应用了上面的操作后，我们可以得到又一个关键的数据`outputFrame`,即`Mask`每一帧在输出视频上的位置数据***
 
 
 #### 4、生成混合`MP4` 资源
@@ -139,12 +139,13 @@
 * 将 步骤3 的数据 用 `zlib` 打包后，使用 `base64` 的方式存储
 * 将生成的 `base64` 数据，封装成如下格式
 * 由于 H5 不会嵌入 `ffmpeg` 库，因此 H5 提取 `Metadata` 段的方式依赖用正则匹配，因此我们的 `Metadata` 数据格式会加上前后缀 `yyeffectmp4json[[base64]]yyeffectmp4json` ,这样可以方便 `H5` 快速定位到 `Metadata` 段的数据
-
 ```js
  var templateStart = "yyeffectmp4json[["
  var templateEnd = "]]yyeffectmp4json"
  base64 =  templateStart + base64 + templateEnd
 ```
+* 将数据写入到MP4中的Metadata段中
+
  
 ### 客户端测
 
