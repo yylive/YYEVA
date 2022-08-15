@@ -39,9 +39,10 @@
 
 ***该功能模块主要是给设计师提供制作MP4资源的相关插件***
 
-我们开发的插件的主界面如下： 
+我们开发的插件的主界面如下：  
 
-![img](./img/yyeva_ae_plugin_main.png)
+ <img src="https://github.com/yylive/YYEVA/blob/main/img/yyeva_ae_plugin_main.png" width = "469" height = "549" alt="图片名称" align=center />
+ 
 
 其中
 * `h264`/`h265` : 主要是为了扩充`Adobe Effect After` 无法直接渲染出 `MP4` 而开发的一个子模块
