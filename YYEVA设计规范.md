@@ -59,9 +59,11 @@
    *  帧率要和输出合成的帧率保持一致
    *  图层的大小 和 帧率 必须以输出合成帧率 及  rgb 区域的大小 保持一致
 
-    <img src="./img/ae_mask_step_create_2.png" width = "835" height = "361" alt="图片名称" align=center />
+
+<img src="./img/ae_mask_step_create_2.png" width = "835" height = "361" alt="图片名称" align=center />
     
-    <img src="./img/ae_mask_step_create_3.png" width = "709" height = "332" alt="图片名称" align=center />
+
+<img src="./img/ae_mask_step_create_3.png" width = "709" height = "332" alt="图片名称" align=center />
     
    
    如上图，输出合成的大小是 1800 x 1000 ，其中  rgb 区域 是 900 x 1000，则  Mask 创建的合成也要是 900 x 1000
@@ -84,29 +86,25 @@
          `font-size` : 该文案的大小
    ```
    
-   ***当客户端渲染时，会找到上面的key，来进行动态插入***
-   
-
-   
+   ***当客户端渲染时，会找到上面的key，来进行动态插入*** 
    <img src="./img/ae_mask_text_key.png" width = "1181" height = "292" alt="图片名称" align=center />
      
    * 制作 `mask_image` 
-   
-      
    <img src="./img/ae_mask_image_create.png" width = "605" height = "289" alt="图片名称" align=center />
-   
-      创建完`mask_image`合成后 ,就可以在该合成下面去制作"图片类"图层了,上图的案例中，我们创建了2个 椭圆 图层，分别代表的是插入的2个图片类的元素  以第一个图层为例
-
-     `name` ： anchor_avatar-aspectfit
-       名称以   -  符号作为分隔  ,支持的格式 为   key   -     scaleMode 
-       
-     ```js
-      key ： 客户端渲染时 ， 索引该  mask  的名称
-      scaleMode   :   图片放缩时的模式
-       * aspectFill 保持图像的纵横比并将图像缩放成将适合背景定位区域的最大大小。
-       * aspectFit 保持图像的纵横比并将图像缩放成将完全覆盖背景定位区域的最小大小。
-       * scaleFill 不保持图像的纵横比，铺面背景区域。
-     ```
+    创建完`mask_image`合成后 ,就可以在该合成下面去制作"图片类"图层了,上图的案例中，我们创建了2个 椭圆 图层，分别代表的是插入的2个图片类的元素  以第一个图层为例
+    
+    name: anchor_avatar-aspectfit
+        
+        说明: 名称以 - 符号作为分隔  ,支持的格式 为key-scaleMode 
+         
+         字段解释:  
+          
+          key:客户端渲染时 ， 索引该  mask  的名称
+          
+          scaleMode:图片放缩时的模式
+            * aspectFill 保持图像的纵横比并将图像缩放成将适合背景定位区域的最大大小。
+            * aspectFit 保持图像的纵横比并将图像缩放成将完全覆盖背景定位区域的最小大小。
+            * scaleFill 不保持图像的纵横比，铺面背景区域。 
      
   #### 3. 在RGB的合成上引用2个`Mask`合成
   
