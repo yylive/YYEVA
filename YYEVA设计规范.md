@@ -54,8 +54,7 @@
    上图 创建了 2个 `Mask` 合成，这里需要注意 创建的规范是：
    
    *  合成的命名必须是  mask_text 或者  mask_image 
-   *  帧率要和输出合成的帧率保持一致
-   *  图层的大小 和 帧率 必须以输出合成帧率 及  rgb 区域的大小 保持一致
+   *  图层的大小 和 帧率 必须与输出合成的  帧率及rgb区域的大小 保持一致
 
 
 <img src="./img/ae_mask_step_create_2.png" width = "835" height = "361" alt="图片名称" align=center />
