@@ -78,7 +78,7 @@
    
 
 `name` ： anchor_nick-002AFF-36
-      名称以   -  符号作为分隔  ,支持的格式 为   key   -    font-Color   -  font-size 
+      名称以`-`符号作为分隔, 格式为   key-fontColor-fontsize 
 
 ```js
    `key` ： 客户端渲染时 ， 索引该  `mask`  的名称
