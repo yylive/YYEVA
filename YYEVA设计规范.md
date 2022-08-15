@@ -16,46 +16,12 @@
 3. `导出日志模块`: 主要是快速导出解析和转换过程中的日志，方便排查插件的一些功能 BUG
 
 
-## 插件 环境搭建
+## 插件安装和环境搭建
 
-###  插件安装
+ [文档](https://github.com/yylive/YYEVA/blob/main/%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.md)
 
- 1. 下载 [zxp插件安装工具](https://aescripts.com/learn/zxp-installer/) 
- 2. 下载 [`YYEVA插件`](./AEP/build/2.1.1/YYYSMP4Conveter.zxp) 插件，并通过 `ZXP` 安装工具安装插件   
- 3. 检查插件是否安装成功
- 4. 重启 AE，选择 窗口 -》 扩展 -》 检查是否 多出一个  YY-MP4转换  项 
  
-![img](./img/ae_installer_step1.png) 
-
-###  环境配置
-
-  1. 创建 `YYConvertMP4` 模板 。  ***重要步骤***
-  
-   * 打开AE，选择编辑 ---->  模板  ----> 输出模块
-
-   ![img](./img/ae_config_step1.png) 
-    
-   * 按如下步骤创建 `YYConvertMP4` 输出模板
-   
-   ![img](./img/ae_config_step2.png) 
-   
-   * 开启权限
-    
-      * Mac
-      
-   如图 ： 打开脚本和表达式：
-   
-   ![img](./img/ae_config_step3.png) 
-      
-   接下来勾选“允许脚本写入文件和访问网络”
-   
-   ![img](./img/ae_config_step4.png) 
-      
-   * Windows
-      
-      打开左上角编辑->首选项->脚本和表达式，打开窗口后勾选“允许脚本写入文件和访问网络”
- 
- ## 插件使用
+## 插件使用
       
  ### `h264/h265`模块  使用介绍
  
