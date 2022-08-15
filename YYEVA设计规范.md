@@ -7,7 +7,7 @@
 
 ## YY-MP4转换 插件主界面 
 
-<img src="./img/yyeva_ae_plugin_main.png" width = "469" height = "549" alt="图片名称" align=center />
+  <img src="./img/yyeva_ae_plugin_main.png" width = "469" height = "549" alt="图片名称" align=center />
   
 
 其中
@@ -22,20 +22,18 @@
  [文档](https://github.com/yylive/YYEVA/blob/main/%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.md)
 
 
- 
 ## 插件使用
       
- ### `h264/h265`模块  使用介绍
- 
+ ### `h264/h265`模块  使用介绍 
   1. 选中一个已经制作好的  普通透明MP4  输出合成
   2. 打开 窗口 ->  扩展 ->  YY-MP4转换 工具
-  3. 开始转换
-    * 设置输出路径
-    * 选择 视频质量 的档位   其中： 高档（ CRF 18） 中档：( CRF  23)  低档：（ CRF 28） ， 自定义可以自行决定 CRF 的值
-    * 点击开始转换
+  3. 开始转换  
+      1. 设置输出路径
+      2. 选择 视频质量 的档位   其中： 高档（ CRF 18） 中档：( CRF  23)  低档：（ CRF 28） ， 自定义可以自行决定 CRF 的值 
+      3. 点击开始转换 
   4. 资源输出  (会在指定的输出路径 ： 资源输出 一套   MP4 资源，输出的文件名规范为 )
-    * h264 资源:  选择的合成name_normal_h264_档位.mp4
-    * h265 资源:  选择的合成name_normal_h265_档位.mp4
+        * h264 资源:  选择的合成name_normal_h264_档位.mp4
+        * h265 资源:  选择的合成name_normal_h265_档位.mp4
      
  
  ### `Dynamic`模块 使用介绍
@@ -77,14 +75,15 @@
    
    创建完`mask_text`合成后 ,就可以在该合成下面去制作"文字类"图层了，上图的案例中，我们创建了2个 矩形图层，分别代表的是插入的2个文字元素   以第一个图层为例
    
-   `name` ： anchor_nick-002AFF-36
+
+`name` ： anchor_nick-002AFF-36
       名称以   -  符号作为分隔  ,支持的格式 为   key   -    font-Color   -  font-size 
-        
-   ```js
-         `key` ： 客户端渲染时 ， 索引该  `mask`  的名称
-         ` font-color`  : 该文案的颜色
-         `font-size` : 该文案的大小
-   ```
+
+```js
+   `key` ： 客户端渲染时 ， 索引该  `mask`  的名称
+   ` font-color`  : 该文案的颜色
+   `font-size` : 该文案的大小
+```
    
    ***当客户端渲染时，会找到上面的key，来进行动态插入*** 
    <img src="./img/ae_mask_text_key.png" width = "1181" height = "292" alt="图片名称" align=center />
@@ -92,8 +91,9 @@
    * 制作 `mask_image` 
    <img src="./img/ae_mask_image_create.png" width = "605" height = "289" alt="图片名称" align=center />
     创建完`mask_image`合成后 ,就可以在该合成下面去制作"图片类"图层了,上图的案例中，我们创建了2个 椭圆 图层，分别代表的是插入的2个图片类的元素  以第一个图层为例
-    
-    name: anchor_avatar-aspectfit
+<br />   
+<br />   
+ name: anchor_avatar-aspectfit
         
         说明: 名称以 - 符号作为分隔  ,支持的格式 为key-scaleMode 
          
