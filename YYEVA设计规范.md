@@ -5,9 +5,10 @@
 
   在 [第四篇:YYEVA , 让MP4静态资源也能够动态起来](./YYEVA-让MP4静态资源也能够动态起来.md) 文章中有提到， `YYEVA` 包含一套完整的工具链，从设计端的资源输出，到资源预览，再到客户端的渲染 `SDK` 。本章内容主要是讲解 `YYEVA` 设计端的插件 `YY-MP4` 转换  是如何配置环境 和使用的。
 
-## YY-MP4转换 插件主界面
+## YY-MP4转换 插件主界面 
 
-![img](./img/yyeva_ae_plugin_main.png)
+<img src="./img/yyeva_ae_plugin_main.png" width = "469" height = "549" alt="图片名称" align=center />
+  
 
 其中
 
@@ -19,6 +20,7 @@
 ## 插件安装和环境搭建
 
  [文档](https://github.com/yylive/YYEVA/blob/main/%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.md)
+
 
  
 ## 插件使用
@@ -48,26 +50,28 @@
   * `mask_image` 
      
    因此，如需制作文字类的遮罩，请添加一个 `mask_text` 命名的合成，如需制作图片类的遮罩，请添加一个  `mask_image` 命名的合成。
-   
-   ![img](./img/ae_mask_step_create.png) 
+    
+   <img src="./img/ae_mask_step_create.png" width = "709" height = "332" alt="图片名称" align=center />
    
    上图 创建了 2个 `Mask` 合成，这里需要注意 创建的规范是：
    
    *  合成的命名必须是  mask_text 或者  mask_image 
    *  帧率要和输出合成的帧率保持一致
    *  图层的大小 和 帧率 必须以输出合成帧率 及  rgb 区域的大小 保持一致
-     
-   ![img](./img/ae_mask_step_create_2.png) 
-   
-   ![img](./img/ae_mask_step_create_3.png) 
+
+    <img src="./img/ae_mask_step_create_2.png" width = "835" height = "361" alt="图片名称" align=center />
+    
+    <img src="./img/ae_mask_step_create_3.png" width = "709" height = "332" alt="图片名称" align=center />
+    
    
    如上图，输出合成的大小是 1800 x 1000 ，其中  rgb 区域 是 900 x 1000，则  Mask 创建的合成也要是 900 x 1000
 
    #### 2. 制作 `Mask` 合成
    
    * 制作 `mask_text`
-  
-   ![img](./img/ae_mask_text_create.png) 
+   
+   
+   <img src="./img/ae_mask_text_create.png" width = "518" height = "377" alt="图片名称" align=center />
    
    创建完`mask_text`合成后 ,就可以在该合成下面去制作"文字类"图层了，上图的案例中，我们创建了2个 矩形图层，分别代表的是插入的2个文字元素   以第一个图层为例
    
@@ -82,12 +86,14 @@
    
    ***当客户端渲染时，会找到上面的key，来进行动态插入***
    
-   ![img](./img/ae_mask_text_key.png) 
+
    
+   <img src="./img/ae_mask_text_key.png" width = "1181" height = "292" alt="图片名称" align=center />
      
    * 制作 `mask_image` 
    
-      ![img](./img/ae_mask_image_create.png) 
+      
+   <img src="./img/ae_mask_image_create.png" width = "605" height = "289" alt="图片名称" align=center />
    
       创建完`mask_image`合成后 ,就可以在该合成下面去制作"图片类"图层了,上图的案例中，我们创建了2个 椭圆 图层，分别代表的是插入的2个图片类的元素  以第一个图层为例
 
@@ -106,11 +112,11 @@
   
   在  rgb 合成上，需要引用刚刚制作好的两个  Mask 合成，即关联上了这2个  Mask 
         
-  ![img](./img/ae_reference_out.png) 
+  <img src="./img/ae_reference_out.png" width = "547.5" height = "459" alt="图片名称" align=center />
   
   #### 4. 使用插件 导出资源
   
-  ![img](./img/ae_output_mp4.png) 
+  <img src="./img/ae_output_mp4.png" width = "634.5" height = "485.5" alt="图片名称" align=center />
 
   等待转换完成后，会在指定的输出路径，得到2个 混合 MP4 资源
 
