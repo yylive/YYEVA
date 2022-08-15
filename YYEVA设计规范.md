@@ -69,7 +69,7 @@
 
    #### 2. 制作 `Mask` 合成
    
-   * 制作 `mask_text`
+   ##### 2.1. 制作 `mask_text`
    
    
    <img src="./img/ae_mask_text_create.png" width = "518" height = "377" alt="图片名称" align=center />
@@ -81,31 +81,48 @@
       名称以`-`符号作为分隔, 格式为   key-fontColor-fontsize 
 
 ```js
-   `key` ： 客户端渲染时 ， 索引该  `mask`  的名称
-   ` font-color`  : 该文案的颜色
-   `font-size` : 该文案的大小
+   key:       客户端渲染时，索引该mask的名称
+   fontColor: 该文案的颜色
+   fontSize:  该文案的大小
 ```
    
    ***当客户端渲染时，会找到上面的key，来进行动态插入*** 
    <img src="./img/ae_mask_text_key.png" width = "1181" height = "292" alt="图片名称" align=center />
      
-   * 制作 `mask_image` 
+   ##### 2.2. 制作 `mask_image` 
+   
    <img src="./img/ae_mask_image_create.png" width = "605" height = "289" alt="图片名称" align=center />
-    创建完`mask_image`合成后 ,就可以在该合成下面去制作"图片类"图层了,上图的案例中，我们创建了2个 椭圆 图层，分别代表的是插入的2个图片类的元素  以第一个图层为例
-<br />   
-<br />   
- name: anchor_avatar-aspectfit
-        
-        说明: 名称以 - 符号作为分隔  ,支持的格式 为key-scaleMode 
+   
+创建完 `mask_image` 合成后 ,就可以在该合成下面去制作"图片类"图层了,上图的案例中，我们创建了2个 椭圆 图层，分别代表的是插入的2个图片类的元素  以第一个图层为例
+
+ name: anchor_avatar-aspectfit  以 `-` 符号作为分隔  ,支持的格式为 key-scaleMode 
          
-         字段解释:  
-          
-          key:客户端渲染时 ， 索引该  mask  的名称
-          
-          scaleMode:图片放缩时的模式
-            * aspectFill 保持图像的纵横比并将图像缩放成将适合背景定位区域的最大大小。
-            * aspectFit 保持图像的纵横比并将图像缩放成将完全覆盖背景定位区域的最小大小。
-            * scaleFill 不保持图像的纵横比，铺面背景区域。 
+```js
+   key:         客户端渲染时，索引该mask的名称
+   scaleMode:   图片放缩时的模式
+     aspectFill 保持图像的纵横比并将图像缩放成将适合背景定位区域的最大大小。
+     aspectFit 保持图像的纵横比并将图像缩放成将完全覆盖背景定位区域的最小大小。
+     scaleFill 不保持图像的纵横比，铺面背景区域。 
+``` 
+            
+##### 2.3. 目前插件已支持的图层
+
+  插件内部解析的Mask图层，支持 形状图层 和 引用其他图片图层  
+  
+  1. 支持形状图层
+    
+   不管是文字，还是图片，我们都只记录形状和位置，所以我们目前支持的形状图层，包含了矩形类、圆形类、椭圆类 三种。
+   
+   <img src="./img/support_shape.png" width = "317" height = "197" alt="图片名称" align=center />
+ 
+  2. 支持引用其他图片图层  
+    
+   如一些复杂的形状，我们支持在mask内部引用其他图片图层来支持
+     
+   <img src="./img/ref_other_image.png" width = "464.5" height = "345" alt="图片名称" align=center />
+    
+  3. 除其他上面2类的图层，其他图层（如文本类）暂不支持
+
      
   #### 3. 在RGB的合成上引用2个`Mask`合成
   
