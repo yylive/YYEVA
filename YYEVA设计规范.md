@@ -25,7 +25,7 @@
  
  [视频2:YYEVA-AE环境搭建](https://haokan.baidu.com/v?vid=3992716940524068736)
  
- [视频3:YYEVA-如何创建一个mask合成]()
+ [视频3:YYEVA-如何创建一个mask合成](https://haokan.baidu.com/v?vid=3790846386515224122)
 
 
 ## 插件使用
