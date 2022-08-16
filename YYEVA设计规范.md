@@ -20,6 +20,12 @@
 ## 插件安装和环境搭建
 
  [文档](https://github.com/yylive/YYEVA/blob/main/%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85%E5%92%8C%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.md)
+ 
+ [视频1:YYEVA-AE相关工具安装](https://haokan.baidu.com/v?vid=3491294283278333966)
+ 
+ [视频2:YYEVA-AE环境搭建](https://haokan.baidu.com/v?vid=3992716940524068736)
+ 
+ [视频3:YYEVA-如何创建一个mask合成]()
 
 
 ## 插件使用
