@@ -473,10 +473,11 @@ var DynamicMp4Conveter = (function() {
                     copyPosition.setValueAtTime( cTime,[newLayerX, newLayerY, 0]);
                     continue;
                 }
-
-                copyLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE
-
+ 
+                // copyLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE
                 var position = copyLayer.property("ADBE Transform Group").property("ADBE Position");
+                // 取消父级和链接 防止位置错乱
+                copyLayer.parent = null
 
                 var frameInfo = frames[frameIndex];
                 var layerWidth = frameInfo["width"];
