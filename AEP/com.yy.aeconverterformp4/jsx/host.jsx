@@ -22,7 +22,7 @@ var AECompoItemUtils = (function() {
         }
         return false;
     }
-
+  
     AECompoItemUtils.prototype.findAlphaLayer = function (activeItem){
 
         if (activeItem == null || activeItem == undefined) {
@@ -243,7 +243,7 @@ var DynamicMp4Conveter = (function() {
         }
         //获取文字/图像遮罩合成
         logMessage("开始处理,所选合成为：" + this.activeItem.name)
-
+  
         var txtCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text);
         var imgCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image);
 
@@ -252,12 +252,14 @@ var DynamicMp4Conveter = (function() {
         var imgMaskInfo = imgCompoItem != undefined ? this.analysisMaskCompo(imgCompoItem) : undefined;
         var maskInfoList = [];
 
-        if (txtMaskInfo != undefined) {
-            maskInfoList = maskInfoList.concat(txtMaskInfo)
-        }
         if (imgMaskInfo != undefined) {
             maskInfoList = maskInfoList.concat(imgMaskInfo)
         }
+
+        if (txtMaskInfo != undefined) {
+            maskInfoList = maskInfoList.concat(txtMaskInfo)
+        }
+        
 
         if (txtMaskInfo == undefined && imgMaskInfo == undefined) {
             logMessage("analysisMaskCompo fail")
@@ -295,8 +297,7 @@ var DynamicMp4Conveter = (function() {
 
         logMessage("mergeLayer complete")
 
-     
-
+         
         var scale = outputInfo.scale;
         var scaleX = (scale.scaleX); //取整
         var scaleY = (scale.scaleY);
@@ -307,7 +308,7 @@ var DynamicMp4Conveter = (function() {
         var outputWidth = compoItem.width * 0.5 * (1 + scaleX);
         var outputHeight = compoItem.height * 0.5 * (1 + scaleY);
 
-        //处理第一帧的宽高
+
         var src = [];
         for (var k in sourceInfos) {
             var sourceRes = sourceInfos[k] 
@@ -353,6 +354,7 @@ var DynamicMp4Conveter = (function() {
             "effect": src,
             "datas": mergeLayerInfos.frame,
         };
+        
 
         //隐藏mask_layer在父layer上
         var hiddenLayers = [];
@@ -414,7 +416,7 @@ var DynamicMp4Conveter = (function() {
 
         var beginY = activeItem.height * 0.5 + margin;
         var beginX = activeItem.width * 0.5 + margin;
-
+ 
         for (var cTime = 0.0; cTime < duration; cTime += step) {
 
             var startX = activeItem.width * 0.5 + margin;
@@ -506,7 +508,7 @@ var DynamicMp4Conveter = (function() {
 
 
                 //startY = app.project.activeItem.height * 0.5 + margin + layerHeight;
-
+ 
                 var mFrame = this.calculatorMFrame(layer, layerWidth, layerHeight, startX, startY, cTime, (layer.matchName == "ADBE AV Layer"));
                 position.setValueAtTime(cTime, [mFrame["newOrginX"], mFrame["newOrginY"], 0]);
                 mask["outputFrame"] = mFrame["frame"];
@@ -669,7 +671,7 @@ var DynamicMp4Conveter = (function() {
             layerInfo["type"] = this.compoItemUtils.maskTypeWithCompo(compoItem);
             layerInfo["startTime"] = compoItem.displayStartTime + layer.startTime; //把开始时间也copy过去
             allMaskLayer.push(layerInfo)
-            logMessage("分析完成："  + layer.name);
+            logMessage("分析完成："  + layer.name);  
         }
         return allMaskLayer;
     }
@@ -993,10 +995,53 @@ var DynamicMp4Conveter = (function() {
 }());
 
 
+function checkMode()
+{
+     //判断当前是否有mask引用
+      var compoItemUtils = new AECompoItemUtils(app);
+      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text);
+      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image);
+
+      if (txtCompoItem == undefined && imgCompoItem == undefined) {
+        return 1
+      } else {
+        return 2
+      }
+}
+
+function beginConverter(tempPath)
+{
+    var compoItem = app.project.activeItem
+
+    if (checkValidCompItem(compoItem) == false) {
+        return undefined;
+    }
+     if (checkHasConverMP4Template(compoItem)==false) {
+        alertMessage("AE模板不正确");
+        logMessage("AE模板不正确");
+        return undefined;
+    }
+
+    //
+    var mode = checkMode() 
+    if (mode == 1) { //normal
+        logMessage("转换模式为:普通透明MP4");
+        var result = startConverter_Alpha(tempPath)
+        result =  {"mode":1,"data":result}
+        return JSON.stringify(result)
+    } else if (mode == 2) {  //dynamic
+        logMessage("转换模式为: 混合MP4");
+        var result = startConverter_Effect(tempPath)
+        result = {"mode":2,"data":result}
+        return JSON.stringify(result)
+    } 
+}
+
+
 //流程
 //1.判断图层合法性（checkSelectInvalide）
 //2.获取所有的Mask合成 (以合成命名为mask_为开头的图层)
-function startConverter(tempPath) {
+function startConverter_Effect(tempPath) {
 
     var compoItem = app.project.activeItem
 
@@ -1016,7 +1061,7 @@ function startConverter(tempPath) {
 }
 
 
-function startConverter_Normal(aviPath) {
+function startConverter_Alpha(aviPath) {
  
     var compoItem = app.project.activeItem 
     var valid = checkValidCompItem(compoItem)
@@ -1032,8 +1077,29 @@ function startConverter_Normal(aviPath) {
     }  
   
     var file = renderQueue(compoItem,aviPath)
+ 
 
-    return file
+    var width = app.project.activeItem.width;
+    var height = app.project.activeItem.height;
+    var outputJson = {
+            "descript": {
+                "width": width,
+                "height": height,
+                "isEffect": 0,
+                "version": AE_Extension_Version,
+                "rgbFrame": [0, 0, width * 0.5, height],
+                "alphaFrame": [width * 0.5, 0, width * 0.5, height],
+                "fps":app.project.activeItem.frameRate,
+                "hasAudio":app.project.activeItem.hasAudio
+            }, 
+        };
+            var result = {
+            "file": file,
+            "evaJson": JSON.stringify(outputJson)
+        };
+
+        var json = JSON.stringify(result)
+        return json; 
 }
 
 

@@ -22,26 +22,17 @@
     background-color:rgb(20, 115, 230);  
     color:white
 }
-#selectPath_normal:after{ 
+#selectPath:after{ 
     background-color:rgb(20, 115, 230);  
     color:white
-}
-#selectPath_dynamic:after{ 
-    background-color:rgb(20, 115, 230);  
-    color:white
-}
+} 
 
-#selectPath_dynamic:hover{ 
+#selectPath:hover{ 
     background-color:rgb(138, 138, 138);  
     color:white
 }
 
-#selectPath_normal:hover{ 
-    background-color:rgb(138, 138, 138);  
-    color:white
-}
-
-#selectPath_dynamic,#selectPath_normal {
+#selectPath {
 
     width: 100px;
     height: 40px;
@@ -70,7 +61,7 @@
  }
 
 
-#pathtext_dynamic,#pathtext_normal {
+#pathtext {
     background-color: "clear";
 }
 

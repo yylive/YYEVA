@@ -210,7 +210,7 @@ function writeZipPromise(zip,path) {
 }
 
 
-function selectPath_normal() {
+function selectPath() {
 
     updateInfo(function (success) {
 
@@ -232,29 +232,11 @@ function cleanProject() {
     outputTempPath = undefined;
     TEMP_SOURCE_PATH = undefined;
     outputPath = undefined;
-    document.getElementById("pathtext_dynamic").innerHTML = "未设置"
-    document.getElementById("pathtext_normal").innerHTML = "未设置"
+    // document.getElementById("pathtext_dynamic").innerHTML = "未设置"
+    document.getElementById("pathtext").innerHTML = "未设置"
     selectLevel(1);
 }
-
-function selectPath_dynamic() {
-
-    updateInfo(function () {
-
-        var result = window.cep.fs.showSaveDialogEx("选择保存目录", CURRENT_SOURCE_PATH, ["mp4"], CURRENT_SOURCE_NAME + '.mp4', '');
-        TEMP_SOURCE_PATH = nodePath.join(CURRENT_SOURCE_PATH, '_temp_');
-        var OSVersion = csInterface.getOSInformation();
-        outputTempPath = nodePath.join(TEMP_SOURCE_PATH, 'temp_change.mp4');
-
-        TEMP_SOURCE_PATH = changePathToPlatform(TEMP_SOURCE_PATH)
-        outputTempPath = changePathToPlatform(outputTempPath)
-        if (result.data) {
-            outputPath = changePathToPlatform(result.data);
-            document.getElementById("pathtext_dynamic").innerHTML = outputPath
-        }
-    });
-}
-
+ 
 function needShowAllCustomerInput(needShow) {
 
     var customerEs = document.getElementsByClassName('customerCRFInput')
@@ -389,24 +371,24 @@ function deleteFile(path) {
     }
 }
 
-function startConvert() {
 
+function beginConverter(){
     if (outputPath == null || outputPath == undefined || outputPath == '') {
         alertMessage("请先选择输出路径");
         return;
     }
 
     createAELogDirIfNeed(function () {
-
         logFile("日志目录准备完成")
 
-        if (!checkCRFValide(MP4ConverMode.dynamic)) {
+        if (!checkCRFValide()) {
             return;
         }
 
-        _startConvert();
+        _beginConveterInternal();
     })
 }
+  
 
 function replaceSuffix(originUrl,extentionPath) {
     var lastDocIndex = originUrl.lastIndexOf('.')
@@ -445,43 +427,61 @@ function replaceSuffix(originUrl,extentionPath) {
     }
 }
 
-function _startConvert() {
 
+function showModalTip(needShow) {
+    var showStr = needShow ? "visible" : "hidden";
+    document.getElementById('modal-overlay').style.visibility = showStr;
+}
+
+function showModalLogTip(needShow) {
+    var showStr = needShow ? "visible" : "hidden";
+    document.getElementById('modal-log-overlay').style.visibility = showStr;
+}
+
+function _beginConveterInternal(){
+    
     showModalTip(true);
-
+    
     progress = 0;
     updateProcess(progress)
-
-    logFile('开始动态元素转换: level:' + encodeLevel + ",crf:" + customer_crf);
-  
+    logFile('开始插件转换: level:' + encodeLevel + ",crf:" + customer_crf);
+    
     createTempFolder(function () {
         progress = 0.1; 
-        updateProcess(progress)
-  
-        var pathObj = replaceSuffix(outputPath,"dynamic")
-        var outFile_264 = pathObj.path_264;
-        var outFile_265 = pathObj.path_265;
-
-        var tempPathObj = replaceSuffix(outputTempPath)
-        var outputTempPath_264 = tempPathObj.path_264;
-        var outputTempPath_265 = tempPathObj.path_265;
-
-        var successMsg = "mp4转换成功"
-
-        logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
-
+        updateProcess(progress) 
         progress = 0.3
-        updateProcess(progress,"临时目录准备完成")
+        updateProcess(progress,"临时目录准备完成") 
+        csInterface.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')", function (res) {
 
-        csInterface.evalScript("startConverter('" + TEMP_SOURCE_PATH + "')", function (json) {
+            if (res == undefined) {
+                return
+            }  
+ 
+            res = JSON.parse(res)
+            var mode = res["mode"]  
+            var data = res["data"]
+
+            var pathObj = mode == 1 ? replaceSuffix(outputPath,"normal") : replaceSuffix(outputPath,"dynamic") 
+            var outFile_264 = pathObj.path_264;
+            var outFile_265 = pathObj.path_265;
+
+            var tempPathObj = replaceSuffix(outputTempPath)
+            var outputTempPath_264 = tempPathObj.path_264;
+            var outputTempPath_265 = tempPathObj.path_265;
+
+            var successMsg = "mp4转换成功"
+
+            logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
+            
+            var jsonStr = data
             progress = 0.5
             updateProcess(progress,"AE工程解析完成")
-            if (json == 'undefined' || json == "") {
+            if (jsonStr == 'undefined' || jsonStr == "") {
                 logFile('json is undefined');
                 showModalTip(false)
                 return
             }
-            var result = JSON.parse(json)
+            var result = JSON.parse(jsonStr)
             var movFile = result["file"]
             var evaJson = result["evaJson"]
             movFile = changePathToPlatform(movFile)
@@ -551,21 +551,47 @@ function _startConvert() {
                 }
             });
 
+            
+
         });
     });
 }
 
-function showModalTip(needShow) {
-    var showStr = needShow ? "visible" : "hidden";
-    document.getElementById('modal-overlay').style.visibility = showStr;
+
+function _startConvert() {
+
+    showModalTip(true);
+
+    progress = 0;
+    updateProcess(progress)
+
+    logFile('开始动态元素转换: level:' + encodeLevel + ",crf:" + customer_crf);
+  
+    createTempFolder(function () {
+        progress = 0.1; 
+        updateProcess(progress)
+  
+        var pathObj = replaceSuffix(outputPath,"dynamic")
+        var outFile_264 = pathObj.path_264;
+        var outFile_265 = pathObj.path_265;
+
+        var tempPathObj = replaceSuffix(outputTempPath)
+        var outputTempPath_264 = tempPathObj.path_264;
+        var outputTempPath_265 = tempPathObj.path_265;
+
+        var successMsg = "mp4转换成功"
+
+        logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
+
+        progress = 0.3
+        updateProcess(progress,"临时目录准备完成")
+
+        csInterface.evalScript("startConverter('" + TEMP_SOURCE_PATH + "')", function (json) {
+           
+
+        });
+    });
 }
-
-function showModalLogTip(needShow) {
-    var showStr = needShow ? "visible" : "hidden";
-    document.getElementById('modal-log-overlay').style.visibility = showStr;
-}
-
-
 
 function _startConvert_normal() {
 
@@ -658,43 +684,20 @@ function completeConvert_for_normal(success,message = "")
     }  
 }
 
-function startConvert_normal() {
-
-    if (outputPath == null || outputPath == undefined || outputPath == '') {
-        alertMessage("请先选择输出路径");
-        return;
-    }
-
-    createAELogDirIfNeed(function () {
-        logFile("日志目录准备完成")
-
-        if (!checkCRFValide(MP4ConverMode.normal)) {
-            return;
-        }
-
-        _startConvert_normal();
-    })
-}
-
-function checkCRFValide(mode) {
+function checkCRFValide() {
     if (encodeLevel == MP4EnCodeLevel.customer) {
         //只有在custom的时候需要检查crf
-        var customerInput ;
-        if (mode == MP4ConverMode.normal) {
-            customerInput = document.getElementById('customerCRFInput_normal')
-        } else if (mode == MP4ConverMode.dynamic) {
-            customerInput = document.getElementById('customerCRFInput_dynamic')
-        }
+        var customerInput = document.getElementById('customerCRFInput')
 
         var crf = customerInput.value;
 
         if (crf < 0 || crf > 51) {
-            logFile("mode:" + mode + ",crf不合法：" + crf)
+            logFile("crf不合法：" + crf)
             alertMessage("crf:" + crf + "取值不合法,[0 <= crf <= 51]")
             customer_crf = 0;
             return false
         }
-        logFile("mode:" + mode + ",crf合法" + crf)
+        logFile(",crf合法" + crf)
         customer_crf = crf
         return true;
     }
