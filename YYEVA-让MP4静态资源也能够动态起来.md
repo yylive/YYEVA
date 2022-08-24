@@ -1,5 +1,7 @@
 # YYEVA , 让MP4静态资源也能够动态起来
 
+简体中文 | [English](https://github.com/yylive/YYEVA/blob/main/YYEVA%2C%20Makes%20the%20mp4%20insert%20Effects%20during%20playing.md)
+
 ## 介绍
 
 在很多业务场景中，需要在静态资源 叠加 业务数据，例如，在直播间的送礼场景下，需要在动效资源内添加用户和主播的头像和昵称。目前比较成熟的方案有 `SVGA`，`Lottie`，这两种方案都能实现在资源显示的时候，动态添加业务数据，但这2种技术方案都不适合一些复杂的3D动效。在直播领域，一些大额的礼物动效都使用了`MP4`资源来播放。
