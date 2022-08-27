@@ -91,44 +91,78 @@ var AECompoItemUtils = (function() {
             return false;
         }
         return true;
-    }
+    } 
 
-    AECompoItemUtils.prototype.findUsedInCompo = function(compoItem,activeItem,chainStr) { 
+    AECompoItemUtils.prototype.findUsedInCompo = function(compoItem,chainStr) { 
         var usedInItems = compoItem.usedIn 
+        logMessage("usedInItems.length:" + usedInItems.length)  
         if(usedInItems.length > 0 ) {
           for (var i = 0 ; i < usedInItems.length;i++) {
-             var item = usedInItems[i]   
+             var item = usedInItems[i]  
+             logMessage("item.name:" + item.name) 
              if (item != undefined) {
-                 if (item == activeItem) {  
-                     return {"item" : item , "chain" : chainStr + "->" + activeItem.name}
+                 if (item == this.app.project.activeItem) {   
+                     //checkVisible
+                     if (this.checkVisible(chainStr)) {
+                        return (this.app.project.activeItem.name + chainStr)    
+                     }    
                  } else {
-                     return this.findUsedInCompo(item,activeItem,chainStr + "->" + item.name)
+                    logMessage("item.name:" + item.name + ",length:" + item.usedIn.length) 
+                     if (item.usedIn.length > 0 )
+                      var subFind = this.findUsedInCompo(item,item.name + "->" + chainStr)  
+                      if (subFind != undefined) {
+                         return subFind
+                      }
                  }
-             }
+             }  
           }
       } 
       return undefined
-}
+  } 
+
+   AECompoItemUtils.prototype.checkVisible = function(chainArryStr) { 
+        var activeItem = this.app.project.activeItem
+        var chainArry = chainArryStr.split("->") 
+        var item = activeItem
+        var layerChainEnabled = true
+        for (var i = 0 ; i < chainArry.length; i ++) {
+             
+             var currentLayer =  item.layer(chainArry[i]) 
+             logMessage("currentLayer:" + currentLayer.name)
+            if (  currentLayer.enabled == true) {
+                item = item.layer(chainArry[i]).source 
+            } else {
+                layerChainEnabled = false 
+                break
+            }
+        } 
+        logMessage(layerChainEnabled)
+        return  layerChainEnabled
+   }
+         
+
     
 
     AECompoItemUtils.prototype.maskCompoWithJudgeName = function(judgeName) {
         var collection_item = this.app.project.items;
-        var compoItemsCount = collection_item.length;
-
+        var compoItemsCount = collection_item.length; 
         for (var i = 1; i <= compoItemsCount; i++) {
             var compoItem = collection_item[i];
             //判斷是普通合成
-            if ((compoItem != undefined)) { 
+            if ((compoItem != undefined)) {  
                 if (compoItem.name.match(judgeName)) {
-                    //分析引用关系   
-                    var chain = this.findUsedInCompo(compoItem,this.app.project.activeItem,judgeName + "->")
+                    //分析引用关系    
+                    logMessage("开始寻找链条：" + judgeName )
+                    var chain = this.findUsedInCompo(compoItem,judgeName) 
                     if (chain != undefined) {
-                        logMessage("找到了" + judgeName + ",引用链条为：" + chain.chain)
+                        logMessage("找到了" + judgeName + ",引用链条为：" + chain)
                         return compoItem;
+                    } else {
+                        logMessage("没找到了" + judgeName + "的引用链条")
                     }
                 }
             }
-        }
+        }  
         return undefined; 
     }
 
@@ -1024,6 +1058,7 @@ function beginConverter(tempPath)
 
     //
     var mode = checkMode() 
+
     if (mode == 1) { //normal
         logMessage("转换模式为:普通透明MP4");
         var result = startConverter_Alpha(tempPath)

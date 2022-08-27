@@ -222,7 +222,7 @@ function selectPath() {
         outputTempPath = changePathToPlatform(outputTempPath)
         if (result.data) {
             outputPath = changePathToPlatform(result.data);
-            document.getElementById("pathtext_normal").innerHTML = outputPath
+            document.getElementById("pathtext").innerHTML = outputPath
         }
     });
 }
