@@ -2,7 +2,7 @@
 
 ## Introduction
 
-As mentioned in [YYEVA, Makes the mp4 insert Effects during playing](./YYEVA-让MP4静态资源也能够动态起来.md), `YYEVA` contains a complete tool chain, from the resource output on the design, to resource preview and rendering on the client. This chapter is mainly explain how the plug-in MP4 conversion configures the environment and be used.
+As mentioned in [YYEVA, Makes the mp4 insert Effects during playing](./YYEVA,Makes_the_mp4_insert_Effects_during_playing.md), `YYEVA` contains a complete tool chain, from the resource output on the design, to resource preview and rendering on the client. This chapter is mainly explain how the plug-in MP4 conversion configures the environment and be used.
 
 ## MP4 conversion plug-in main interface
 
