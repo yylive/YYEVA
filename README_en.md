@@ -1,3 +1,10 @@
+[![yylive - yyeva](https://img.shields.io/static/v1?label=yylive&message=yyeva&color=blue&logo=github)](https://github.com/yylive/yyeva "Go to GitHub repo")
+[![stars - yyeva](https://img.shields.io/github/stars/yylive/yyeva?style=social)](https://github.com/yylive/yyeva)
+[![forks - yyeva](https://img.shields.io/github/forks/yylive/yyeva?style=social)](https://github.com/yylive/yyeva)
+[![GitHub release](https://img.shields.io/github/release/yylive/yyeva?include_prereleases=&sort=semver&color=blue)](https://github.com/yylive/yyeva/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![issues - yyeva](https://img.shields.io/github/issues/yylive/yyeva)](https://github.com/yylive/yyeva/issues)
+
 # YYEVA  
 
 [简体中文](./README.md) | English
