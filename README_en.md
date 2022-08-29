@@ -38,12 +38,12 @@ YYEVA is a solution further expanded on the basis of the transparent MP4 effect 
 
 ## Documentation
 
-<!-- * [第一篇:直播间礼物动效 - 实现方案](./直播间礼物动效实现方案.md)
-* [第二篇:透明MP4礼物](./透明MP4礼物.md)
-* [第三篇:变换矩阵在动画上一些应用](./变换矩阵在动画上一些应用.md)
-* [第四篇:YYEVA , 让MP4静态资源也能够动态起来](./YYEVA-让MP4静态资源也能够动态起来.md)
-* [第五篇:YYEVA设计规范](./YYEVA设计规范.md)
-* [第六篇:YYEVA数据结构](./数据结构.md) -->
+* [Article 1:Live room animation solutions](./Live%20room%20animation%20solutions.md)
+* [Article 2:Transparent MP4 Gift](./YY%20Transparent%20MP4%20Gift.md)
+* [Article 3:Application scenarios of transformation matrix in animation](./Application%20scenarios%20of%20transformation%20matrix%20in%20animation.md)
+* [Article 4:YYEVA,Makes the mp4 insert Effects during playing](./YYEVA,Makes_the_mp4_insert_Effects_during_playing.md)
+* [Article 5:YYEVA Design Secification](./YYEVA%20%20Design%20Secification.md)
+* [Article 6:YYEVA-DataConstruct](./YYEVA-DataConstruct.md) 
 
  
 
