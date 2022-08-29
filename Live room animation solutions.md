@@ -1,5 +1,7 @@
 # Live room animation solutions
 
+[简体中文](./直播间礼物动效实现方案.md) | English
+
 # Animation Solutions
  
 ## Overview
