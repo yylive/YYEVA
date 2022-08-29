@@ -39,8 +39,8 @@ As mentioned in [YYEVA, Makes the mp4 insert Effects during playing](./YYEVA,Mak
 
 	![img](./img/ae_config_step3.png)
 
-	*	Select the Allow Scripts To Write Files And Access Network option.
-****
+	* Select the Allow Scripts To Write Files And Access Network option.
+ 
 	![img](./img/ae_config_step4.png) 
 
 ## Plug-in Usage
@@ -73,14 +73,14 @@ So, to make a text type of mask, add a composition named `mask_text`, and to mak
 ![img](./img/ae_mask_step_create.png) 
 
 The above step create two `Mask` composition and pay attention to following secifications:
-****
+
  * Composition name must be `mask_text` or `mask_image`.
  * FrameRate must equal to the composition frameRate.
  * The size of layer must equal to the size of rgb area.
 
-   ![img](./img/ae_mask_step_create_2.png) 
+![img](./img/ae_mask_step_create_2.png) 
    
-   ![img](./img/ae_mask_step_create_3.png) 
+![img](./img/ae_mask_step_create_3.png) 
 
 As shown above, the size of the output composition is 1800 x 1000, where the rgb area is 900 x 1000, and the composition created by Mask is also 900 x 1000.
 
