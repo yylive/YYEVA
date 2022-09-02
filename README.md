@@ -15,6 +15,10 @@
   
   该方案是在透明MP4动效解决方案的基础上，做了进一步扩充，让静态的MP4资源，也能够支持插入动态的元素，关于透明MP4的相关介绍，请点击 [第二篇:透明MP4礼物](./透明MP4礼物.md) 查看相关介绍。
   
+## 支持本项目
+
+请支持我们的项目，点击 GitHub Star, 让更多的人看到该项目
+  
 ## 效果演示
   
   <img src="https://github.com/yylive/YYEVA/blob/main/img/teampk.gif" width = "424" height = "898" alt="图片名称" align=center />
@@ -44,6 +48,20 @@
 * [第五篇:YYEVA设计规范](./YYEVA设计规范.md)
 * [第六篇:YYEVA数据结构](./数据结构.md)
 
+
+## YYEVA视频教程 
+
+ * [视频1:YYEVA-AE相关工具安装](https://haokan.baidu.com/v?vid=3491294283278333966)
+ 
+ * [视频2:YYEVA-AE环境搭建](https://haokan.baidu.com/v?vid=3992716940524068736)
+ 
+ * [视频3:YYEVA-如何创建一个mask合成](https://haokan.baidu.com/v?vid=4642247610775827417)
+ 
+ * [视频4:YYEVA-制作mask_text](https://haokan.baidu.com/v?vid=4194131635125381977)
+
+ * [视频5:YYEVA-制作mask_image](https://haokan.baidu.com/v?vid=3618349934251838627)
+ 
+ * [视频6:YYEVA-如何安装或更新CEP插件](https://www.bilibili.com/video/BV1ia411R7Dn/)
 
 ## 目录介绍 
 
