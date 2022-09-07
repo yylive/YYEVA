@@ -155,7 +155,7 @@
 
   设计同学可以在预览界面，预览该合成视频
   
-   [预览工具](https://gfe.yy.com/e-video/preview/) 
+   [预览工具](https://yyeva.netlify.app/) 
    
    
    在该预览界面下，将输出文件拖入预览区域，即可看到当前视频包含的可嵌入的元素 的 key 及类型
