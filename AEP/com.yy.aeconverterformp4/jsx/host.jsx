@@ -365,19 +365,41 @@ var DynamicMp4Conveter = (function() {
 
         var src = [];
         for (var k in sourceInfos) {
-            var sourceRes = sourceInfos[k] 
+            var sourceRes = sourceInfos[k]  
             var tempSourceId = sourceRes["effectId"]
-            var  tempFrame = outputInfo.mergeLayerInfos.frame
-            var tempDatas = tempFrame[0]["data"]
-            for (var j = 0 ; j < tempDatas.length  ; j++) {
-                var tempData =  tempDatas[j]
-                if(tempData["effectId"] == tempSourceId) {
-                    sourceRes["effectWidth"] =  tempData["renderFrame"][2] 
-                    sourceRes["effectHeight"] =  tempData["renderFrame"][3]
-                    break
-                }
-            }
-           
+            var tempFrame = outputInfo.mergeLayerInfos.frame
+            
+            //寻找最大值
+            var length = tempFrame.length 
+            var maxWidth = 0
+            var maxHeight = 0
+            for (var tempFrameIndex = 0 ; tempFrameIndex < length; tempFrameIndex ++) {
+                 var tempDatas = tempFrame[tempFrameIndex]["data"] 
+                 for (var j = 0 ; j < tempDatas.length  ; j++) {
+                    var tempData =  tempDatas[j]
+                    if(tempData["effectId"] == tempSourceId) {
+                        var curWidth  =  tempData["renderFrame"][2] 
+                        var curHeight =  tempData["renderFrame"][3]
+
+                        if (curWidth > maxWidth) {
+                            maxWidth = curWidth
+                            maxHeight = curHeight
+                        } else if (curWidth == maxWidth && maxHeight < curHeight) {
+                            maxHeight = curHeight
+                        }  
+                    }
+                } 
+            };
+
+             sourceRes["effectWidth"] =  maxWidth
+             sourceRes["effectHeight"] =  maxHeight
+ 
+
+        
+
+            //寻找最大值
+
+
             src.push(sourceRes);
         }
 
