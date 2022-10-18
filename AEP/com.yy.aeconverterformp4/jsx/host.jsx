@@ -74,8 +74,26 @@ var AECompoItemUtils = (function() {
                     }
                 }
             }
-        }
+        } 
 
+        //有可能使用mov的方式来实现
+        if (alphaLayer == undefined && activeItem.layers.length == 2) {
+             //把右边的扔出去
+             var layer1 =  activeItem.layers[1]
+             var layer2 =  activeItem.layers[2]
+
+             var positionContents1 = layer1.property("ADBE Transform Group").property("ADBE Position");
+             var x1 = positionContents1.valueAtTime(0, false)[0];
+             var positionContents2 = layer2.property("ADBE Transform Group").property("ADBE Position");
+             var x2 = positionContents2.valueAtTime(0, false)[0];
+
+             if (x1 < x2) {
+                alphaLayer = layer2
+             } else {
+                alphaLayer = layer1
+             }
+                     
+        }  
         return alphaLayer;
     }
 
@@ -104,7 +122,7 @@ var AECompoItemUtils = (function() {
                  if (item == this.app.project.activeItem) {   
                      //checkVisible
                      if (this.checkVisible(chainStr)) {
-                        return (this.app.project.activeItem.name + chainStr)    
+                        return (this.app.project.activeItem.name  + "->" +  chainStr)    
                      }    
                  } else {
                     logMessage("item.name:" + item.name + ",length:" + item.usedIn.length) 
@@ -128,14 +146,16 @@ var AECompoItemUtils = (function() {
         for (var i = 0 ; i < chainArry.length; i ++) {
              
              var currentLayer =  item.layer(chainArry[i]) 
-             logMessage("currentLayer:" + currentLayer.name)
-            if (  currentLayer.enabled == true) {
-                item = item.layer(chainArry[i]).source 
-            } else {
-                layerChainEnabled = false 
-                break
-            }
-        } 
+             if (currentLayer != null) {
+                 logMessage("currentLayer:" + currentLayer.name)
+                 if (  currentLayer.enabled == true) {
+                    item = item.layer(chainArry[i]).source 
+                } else {
+                    layerChainEnabled = false 
+                    break
+                }
+             } 
+        }    
         logMessage(layerChainEnabled)
         return  layerChainEnabled
    }
@@ -1054,9 +1074,7 @@ function beginConverter(tempPath)
         alertMessage("AE模板不正确");
         logMessage("AE模板不正确");
         return undefined;
-    }
-
-    //
+    } 
     var mode = checkMode() 
 
     if (mode == 1) { //normal
@@ -1088,13 +1106,54 @@ function startConverter_Effect(tempPath) {
         alertMessage("AE模板不正确");
         logMessage("AE模板不正确");
         return undefined;
+    } 
+
+    if(checkMaskWidthHeight() == false) { 
+        logMessage("mask合成的宽高不符合规范");
+        return undefined;
     }
+    
 
     var mp4Conveter = new DynamicMp4Conveter(app);
     var json = mp4Conveter.beginConveter(tempPath)
     return json;
 }
 
+function checkMaskWidthHeight()
+{
+      var compoItemUtils = new AECompoItemUtils(app);
+      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text);
+      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image);
+ 
+
+      var activeWidth = app.project.activeItem.width
+      var activeHeight = app.project.activeItem.height
+ 
+      if (txtCompoItem!=undefined && txtCompoItem!=null) {
+          var txtWidth = txtCompoItem.width
+          var txtHeight = txtCompoItem.height
+
+          if (Math.floor(txtWidth) != Math.floor(activeWidth / 2) || txtHeight !=  activeHeight){
+                alertMessage("mask_text合成的宽高不符合规范，请检查mask_text合成的宽高为输出合成宽的一半");
+                return false 
+          }
+       
+      }
+
+       if (imgCompoItem!=undefined && imgCompoItem!=null) {
+          var imgWidth = imgCompoItem.width
+          var imgHeight = imgCompoItem.height
+ 
+          if (Math.floor(imgWidth) != Math.floor(activeWidth / 2) ||  imgHeight!= activeHeight){
+                alertMessage("mask_image合成的宽高不符合规范，请检查mask_image合成的宽高为输出合成高的一半");
+                return false
+          }  
+      }
+
+
+     return true
+
+}
 
 function startConverter_Alpha(aviPath) {
  
