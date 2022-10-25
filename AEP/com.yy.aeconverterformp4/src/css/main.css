@@ -4,7 +4,7 @@
  /* }*/
 
 #converterBtn {
-    width: 100px;
+    width: 120px;
     height: 40px;
     border-radius: 20px; 
     border: 1px solid rgb(138, 138, 138);
@@ -80,6 +80,15 @@
 }
 
 .customerCRFInput {
+    width: 50px;
+    height: 20px; 
+}
+
+#alphaControlDiv{
+    visibility: hidden;
+}
+
+.customerAlphaInput {
     width: 50px;
     height: 20px;
 }

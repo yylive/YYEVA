@@ -5,6 +5,7 @@ var OS_VERSION_MAC = 2;
 
 var EFFECT_TAG_TYPE_TEXT = "txt"
 var EFFECT_TAG_TYPE_IMAGE = "img" 
+ 
 
 /**
  * 用来生成支持MP4视频插入动态元素的AE脚本
@@ -194,7 +195,9 @@ var AECompoItemUtils = (function() {
         }
         return "";
     }
-    AECompoItemUtils.prototype.scaleAlpha = function(activeItem) {
+
+    ///修改Alpha区域
+    AECompoItemUtils.prototype.scaleAlpha = function(activeItem,aspectAlphaRatio) {
 
         try {
             if (activeItem == null || activeItem == undefined) {
@@ -207,13 +210,21 @@ var AECompoItemUtils = (function() {
             if (alphaLayer == null || alphaLayer == undefined) {
                 return false;
             }
+ 
 
             var tramsform_group = alphaLayer.property("transform");
-            var width = alphaLayer.width * 0.5;
-            var heigth = alphaLayer.height * 0.5;
-            var x = alphaLayer.width + width * 0.5;
-            var y = heigth * 0.5;
-            tramsform_group.property("scale").setValue([50, 50]);
+            var width = alphaLayer.width * aspectAlphaRatio;
+            var heigth = alphaLayer.height * aspectAlphaRatio;
+
+
+
+            var anchor_point_x = tramsform_group["Anchor Point"].valueAtTime(0.0, false)[0] 
+            var anchor_point_y = tramsform_group["Anchor Point"].valueAtTime(0.0, false)[1] 
+
+            var x = alphaLayer.width + alphaLayer.width * aspectAlphaRatio * 0.5 - (alphaLayer.width * 0.5 - anchor_point_x);
+            var y = alphaLayer.height * aspectAlphaRatio  * 0.5 - (alphaLayer.height * 0.5 - anchor_point_y);
+   
+            tramsform_group.property("scale").setValue([aspectAlphaRatio * 100, aspectAlphaRatio * 100]);
             tramsform_group.property("Position").setValue([x, y]);
 
             return true;
@@ -280,12 +291,10 @@ var DynamicMp4Conveter = (function() {
 
     DynamicMp4Conveter.prototype.scaleOutputCompoItem = function(){
          var activeItem = this.activeItem;
-         var layers = activeItem.layers;
-
-
+         var layers = activeItem.layers; 
     }
 
-
+  
     DynamicMp4Conveter.prototype.beginConveter = function(tempPath) {
 
         //判断有没有convertMP4模板
@@ -333,10 +342,26 @@ var DynamicMp4Conveter = (function() {
         logMessage("loadMaskSourceInfo complete")
 
         //复制合成
-        var compoItem = this.activeItem.duplicate();
+        var compoItem = this.activeItem.duplicate()
+
+        var outCompW = this.activeItem.width / 2
+        var outCompH = this.activeItem.height
+ 
+
+        var aspectAlphaRatio  = 0.5
+        
+        //宽高比大于2的时候 alpha区域要调整到1倍
+        if (outCompW / outCompH > 2 || outCompH / outCompW > 2) {
+            aspectAlphaRatio = 1
+        } else {
+            aspectAlphaRatio = 0.5
+        } 
+ 
+        logMessage("scaleAlpha aspect:" + aspectAlphaRatio)
+         
 
         //缩小alpha区域
-        if (this.compoItemUtils.scaleAlpha(compoItem) == false) {
+        if (this.compoItemUtils.scaleAlpha(compoItem,aspectAlphaRatio) == false) {
             alertMessage("缩放alpha区域失败")
             logMessage("scaleAlpha fail")
             return undefined;
@@ -347,21 +372,21 @@ var DynamicMp4Conveter = (function() {
         //计算最大容纳区域
         //调整输出合成的大小
         //合并图层
-        var outputInfo = this.mergeLayer(maskInfoList, sourceInfos,compoItem);
+
+        var outputInfo = this.mergeLayer(maskInfoList, sourceInfos,compoItem,aspectAlphaRatio);
 
         logMessage("mergeLayer complete")
 
          
         var scale = outputInfo.scale;
         var scaleX = (scale.scaleX); //取整
-        var scaleY = (scale.scaleY);
+        var scaleY = (scale.scaleY)
 
         var orginW = compoItem.width;
         var orginH = compoItem.height;
 
-        var outputWidth = compoItem.width * 0.5 * (1 + scaleX);
-        var outputHeight = compoItem.height * 0.5 * (1 + scaleY);
-
+        var outputWidth = compoItem.width * 0.5 * (1 + scaleX)
+        var outputHeight = compoItem.height * scaleY;
 
         var src = [];
         for (var k in sourceInfos) {
@@ -390,16 +415,10 @@ var DynamicMp4Conveter = (function() {
                     }
                 } 
             };
-
              sourceRes["effectWidth"] =  maxWidth
-             sourceRes["effectHeight"] =  maxHeight
- 
+             sourceRes["effectHeight"] =  maxHeight 
 
-        
-
-            //寻找最大值
-
-
+            //寻找最大值 
             src.push(sourceRes);
         }
 
@@ -416,6 +435,9 @@ var DynamicMp4Conveter = (function() {
         var mergeLayerInfos = outputInfo.mergeLayerInfos;
         var width = this.proj.width;
         var height = this.proj.height;
+
+        
+
         var outputJson = {
             "descript": {
                 "width": outputWidthCeil,
@@ -423,7 +445,7 @@ var DynamicMp4Conveter = (function() {
                 "isEffect": 1,
                 "version": AE_Extension_Version,
                 "rgbFrame": [0, 0, width * 0.5, height],
-                "alphaFrame": [width * 0.5, 0, width * 0.25, height * 0.5],
+                "alphaFrame": [width * 0.5, 0, width * 0.5 * aspectAlphaRatio, height * aspectAlphaRatio],
                 "fps":this.proj.frameRate,
                 "hasAudio":this.activeItem.hasAudio
             },
@@ -475,7 +497,8 @@ var DynamicMp4Conveter = (function() {
         };
     };
 
-    DynamicMp4Conveter.prototype.mergeLayer = function(findMask, souceSrc,copyCompoItem) {
+
+    DynamicMp4Conveter.prototype.calculatorAutoAlphaRatio = function(findMask, souceSrc,copyCompoItem) {
         var margin = 2;
         var frameIndex = 0;
         var mergeLayerInfos = {
@@ -487,27 +510,205 @@ var DynamicMp4Conveter = (function() {
         var frameRate = this.proj.frameRate;
         var step = 1.0 / frameRate;
 
-        var maxWidth = activeItem.width * 0.5 - margin;
-        var maxHeight = activeItem.height * 0.5 - margin;
+        var aspectAlphaRatio = 1
 
-        var beginY = activeItem.height * 0.5 + margin;
+        var maxWidth = 0
+        var maxHeight = 0
+   
+        maxWidth = activeItem.width * (1 - aspectAlphaRatio) - margin ;
+
+        var beginY = activeItem.height * aspectAlphaRatio + margin;
         var beginX = activeItem.width * 0.5 + margin;
  
+        var stepMaxHeight = 0;
         for (var cTime = 0.0; cTime < duration; cTime += step) {
 
-            var startX = activeItem.width * 0.5 + margin;
-            var startY = activeItem.height * 0.5 + margin;
+            var startX = beginX;
+            var startY = beginY;
 
+            //每一帧记录当前帧的最大剩余宽高
             var leftWidth = activeItem.width * 0.5 - margin;
-            var leftHeight = activeItem.height * 0.5 - margin;
-
+            // var leftHeight = activeItem.height * (1 - aspectAlphaRatio) - margin;
+            // if (leftHeight < 0) leftHeight = 0
+            
+            //记录当前行内容的最大宽高
             var curMaxHeight = 0;
             var curWidth = 0;
             var curFrameIndexMask = [];
 
             var preLayer = undefined;
             var preCopyLayer = undefined;
-            var isNewLine = true;
+            var isNewLine = true; 
+            var currentStepMaxHeight = 0;
+            for (var i = 0; i < findMask.length; i++) {
+                var layerInfo = findMask[i];
+                var frames = layerInfo["frame"];
+                var startTime = layerInfo["startTime"];
+                var layer = layerInfo["layer"];
+                var copyLayer = layerInfo["copyLayer"];
+                var srcId;
+                if (souceSrc[layer.name] != undefined) {
+                    srcId = souceSrc[layer.name]["effectId"];
+                }
+                var mask = {
+                    "renderFrame": frames[frameIndex]["frame"],
+                    "effectId": srcId
+                };
+
+                if (frameIndex == 0) {
+                    //copy layer
+                    copyLayer = layer.duplicate();
+                    allCopyLayer.push(copyLayer)
+                    layerInfo["copyLayer"] = copyLayer;
+                    copyLayer.startTime = startTime;
+                }
+
+                if (this.compoItemUtils.isTrackMatteType(layer) && preLayer != undefined && preLayer.hasTrackMatte == true) {
+                    //计算TrackMatte的位置
+                    var positionContents = preLayer.property("ADBE Transform Group").property("ADBE Position");
+                    var x = positionContents.valueAtTime(cTime, false)[0];
+                    var y = positionContents.valueAtTime(cTime, false)[1];
+
+                    var preCopyposition = preCopyLayer.property("ADBE Transform Group").property("ADBE Position");
+                    var newX = preCopyposition.valueAtTime(cTime, false)[0];
+                    var newY = preCopyposition.valueAtTime(cTime, false)[1];
+                    var offSetX = newX - x;
+                    var offSetY = newY - y;
+                    var layerpositionContents = layer.property("ADBE Transform Group").property("ADBE Position");
+                    var layerX = layerpositionContents.valueAtTime(cTime, false)[0];
+                    var layerY = layerpositionContents.valueAtTime(cTime, false)[1];
+                    var newLayerX = layerX + offSetX;
+                    var newLayerY = layerY + offSetY;
+                    var copyPosition = copyLayer.property("ADBE Transform Group").property("ADBE Position");
+                    // copyPosition.setValueAtTime( cTime,[newLayerX, newLayerY, 0]);
+                    continue;
+                }
+ 
+                // copyLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE
+                var position = copyLayer.property("ADBE Transform Group").property("ADBE Position");
+                // 取消父级和链接 防止位置错乱
+                copyLayer.parent = null
+
+                var frameInfo = frames[frameIndex];
+                var layerWidth = frameInfo["width"];
+                var layerHeight = frameInfo["height"];
+                var trueWidth = frameInfo["frame"][2];
+                var trueHeight = frameInfo["frame"][3];
+
+                //計算下一個的位置 
+                if (leftWidth < trueWidth && !isNewLine) {
+                    startY = startY + curMaxHeight + margin;
+                    startX = this.activeItem.width * 0.5 + margin;
+                    curWidth = 0;
+                    if (maxWidth < trueWidth) {
+                        maxWidth = trueWidth;
+                    }  
+                    //重新计算
+                    currentStepMaxHeight += curMaxHeight
+                    curMaxHeight = 0
+                }
+
+                isNewLine = false;
+
+             
+                leftWidth = this.activeItem.width * 0.5 - curWidth - trueWidth - margin
+                curWidth = curWidth + trueWidth + margin
+                if (trueWidth > 0 && trueHeight > 0) {
+                    curMaxHeight = Math.max(curMaxHeight, trueHeight)
+                    startX = startX + margin + trueWidth
+                }
+
+                preLayer = layer;
+                preCopyLayer = copyLayer;
+            }
+            //加上最后一行的
+            currentStepMaxHeight += curMaxHeight
+            stepMaxHeight = Math.max(currentStepMaxHeight,stepMaxHeight)
+
+
+              if (frameIndex == frameRate) {
+                    logMessage("maxHeight," + maxHeight + ",startY:"+startY+",trueHeight:" + trueHeight);
+                    if (maxHeight < stepMaxHeight) {
+                        maxHeight = stepMaxHeight
+                    } 
+                }
+ 
+            frameIndex++;
+        }
+ 
+ 
+
+        var scaleX = 1.0;
+        var scaleY = 1.0;
+        var orginLeftWidth = (this.activeItem.width * 0.5 - margin);
+        var orginLeftHeight = (this.activeItem.height * (1 - aspectAlphaRatio) - margin);
+
+         if (maxWidth > orginLeftWidth) { 
+              scaleX = Math.max((maxWidth - beginX) / orginLeftWidth , 1) ;
+         }
+
+ 
+
+        var aspect =  1 - (maxHeight) /  this.activeItem.height 
+         return aspect
+    }
+
+    
+
+    DynamicMp4Conveter.prototype.mergeLayer = function(findMask, souceSrc,copyCompoItem,alphaAspect) {
+        var margin = 2;
+        var frameIndex = 0;
+        var mergeLayerInfos = {
+            "frame": []
+        };
+        var allCopyLayer = [];
+        var activeItem = this.activeItem;
+        var duration = this.proj.duration;
+        var frameRate = this.proj.frameRate;
+        var step = 1.0 / frameRate;
+
+        var aspectAlphaRatio = alphaAspect
+
+        var maxWidth = 0
+        var maxHeight = 0
+ 
+        
+        //最大值为1倍，计算剩余可容纳的宽高 
+        // if (aspectAlphaRatio >= 1) {
+        //     aspectAlphaRatio = 1
+        //     maxWidth = 0
+        //     maxHeight = 0
+        // } else { 
+        //     maxWidth = activeItem.width * (1 - aspectAlphaRatio) - margin ;
+        //     maxHeight = activeItem.height * (1 - aspectAlphaRatio) - margin;
+        //     if (maxWidth < 0) maxWidth = 0
+        //     if (maxHeight < 0) maxHeight = 0
+        // } 
+        maxWidth = activeItem.width * (1 - aspectAlphaRatio) - margin ;
+
+        var beginY = activeItem.height * aspectAlphaRatio + margin;
+        var beginX = activeItem.width * 0.5 + margin;
+ 
+        var stepMaxHeight = 0;
+        for (var cTime = 0.0; cTime < duration; cTime += step) {
+
+            var startX = beginX;
+            var startY = beginY;
+
+            //每一帧记录当前帧的最大剩余宽高
+            var leftWidth = activeItem.width * 0.5 - margin;
+            // var leftHeight = activeItem.height * (1 - aspectAlphaRatio) - margin;
+            // if (leftHeight < 0) leftHeight = 0
+            
+            //记录当前行内容的最大宽高
+            var curMaxHeight = 0;
+            var curWidth = 0;
+            var curFrameIndexMask = [];
+
+            var preLayer = undefined;
+            var preCopyLayer = undefined;
+            var isNewLine = true; 
+            var currentStepMaxHeight = 0;
             for (var i = 0; i < findMask.length; i++) {
                 var layerInfo = findMask[i];
                 var frames = layerInfo["frame"];
@@ -563,52 +764,63 @@ var DynamicMp4Conveter = (function() {
                 var trueWidth = frameInfo["frame"][2];
                 var trueHeight = frameInfo["frame"][3];
 
-                //計算下一個的位置
-
+                //計算下一個的位置 
                 if (leftWidth < trueWidth && !isNewLine) {
                     startY = startY + curMaxHeight + margin;
                     startX = this.activeItem.width * 0.5 + margin;
                     curWidth = 0;
                     if (maxWidth < trueWidth) {
                         maxWidth = trueWidth;
-                    }
+                    }  
+                    //重新计算
+                    currentStepMaxHeight += curMaxHeight
+                    curMaxHeight = 0
                 }
+
                 isNewLine = false;
 
-                if (frameIndex == frameRate) {
-                    logMessage("maxHeight," + maxHeight + ",startY:"+startY+",trueHeight:" + trueHeight);
-                    if (maxHeight < curMaxHeight) {
-                        maxHeight = curMaxHeight;
-                    }
-                }
-
+                // if (frameIndex == frameRate) {
+                //     logMessage("maxHeight," + maxHeight + ",startY:"+startY+",trueHeight:" + trueHeight);
+                //     if (maxHeight < curMaxHeight) {
+                //         maxHeight = curMaxHeight
+                //     } 
+                // }
 
                 //startY = app.project.activeItem.height * 0.5 + margin + layerHeight;
- 
-                var mFrame = this.calculatorMFrame(layer, layerWidth, layerHeight, startX, startY, cTime, (layer.matchName == "ADBE AV Layer"));
-                position.setValueAtTime(cTime, [mFrame["newOrginX"], mFrame["newOrginY"], 0]);
-                mask["outputFrame"] = mFrame["frame"];
-                curFrameIndexMask.push(mask);
+                var mFrame = this.calculatorMFrame(layer, layerWidth, layerHeight, startX, startY, cTime, (layer.matchName == "ADBE AV Layer"))
+                position.setValueAtTime(cTime, [mFrame["newOrginX"], mFrame["newOrginY"], 0])
+                mask["outputFrame"] = mFrame["frame"]
+                curFrameIndexMask.push(mask)
 
-                leftWidth = this.activeItem.width * 0.5 - curWidth - trueWidth - margin;
-                curWidth = curWidth + trueWidth + margin;
+                leftWidth = this.activeItem.width * 0.5 - curWidth - trueWidth - margin
+                curWidth = curWidth + trueWidth + margin
                 if (trueWidth > 0 && trueHeight > 0) {
-                    curMaxHeight = Math.max(curMaxHeight, trueHeight);
-                    startX = startX + margin + trueWidth;
+                    curMaxHeight = Math.max(curMaxHeight, trueHeight)
+                    startX = startX + margin + trueWidth
                 }
 
                 preLayer = layer;
                 preCopyLayer = copyLayer;
             }
+            //加上最后一行的
+            currentStepMaxHeight += curMaxHeight
+            stepMaxHeight = Math.max(currentStepMaxHeight,stepMaxHeight)
+
+
+              if (frameIndex == frameRate) {
+                    logMessage("maxHeight," + maxHeight + ",startY:"+startY+",trueHeight:" + trueHeight);
+                    if (maxHeight < stepMaxHeight) {
+                        maxHeight = stepMaxHeight
+                    } 
+                }
 
             mergeLayerInfos["frame"].push({
                 "frameIndex": frameIndex,
                 "data": curFrameIndexMask,
-            });
+            })
             frameIndex++;
         }
-
-
+ 
 
         for (var k = 0; k < allCopyLayer.length; k++) {
             var currentLayer = allCopyLayer[k];
@@ -621,17 +833,43 @@ var DynamicMp4Conveter = (function() {
         var scaleX = 1.0;
         var scaleY = 1.0;
         var orginLeftWidth = (this.activeItem.width * 0.5 - margin);
-        var orginLeftHeight = (this.activeItem.height * 0.5 - margin);
+        var orginLeftHeight = (this.activeItem.height * (1 - aspectAlphaRatio) - margin);
 
+         if (maxWidth > orginLeftWidth) { 
+              scaleX = Math.max((maxWidth - beginX) / orginLeftWidth , 1) ;
+         }
 
-        if (maxWidth > orginLeftWidth) {
-           scaleX = Math.max((maxWidth - beginX) / orginLeftWidth , 1) ;
-        }
-        if (maxHeight > orginLeftHeight) {
-            scaleY = Math.max((maxHeight - beginY) /  orginLeftHeight , 1) ;
-        }
+ 
 
-        var scale = {scaleX:scaleX,scaleY:scaleY};
+         if (maxHeight > orginLeftHeight) {
+            // if (orginLeftHeight > 0) {
+            //     scaleY = Math.max((maxHeight - beginY) /  orginLeftHeight , 1) ;
+            // }  else if (orginLeftHeight < 0) {
+            //     var needAddHeight = maxHeight - orginLeftHeight;
+            //     scaleY =   Math.max((maxHeight + this.activeItem.height )/ this.activeItem.height ,0)
+            // }
+                var needAddHeight = maxHeight - orginLeftHeight;
+                scaleY =   Math.max((maxHeight + this.activeItem.height )/ this.activeItem.height ,0)
+         }
+ 
+ 
+
+        // if (orginLeftHeight > 0 && orginLeftWidth > 0) {
+        //     if (maxWidth > orginLeftWidth) {
+        //         scaleX = Math.max((maxWidth - beginX) / orginLeftWidth , 1) ;
+        //     }
+        //     if (maxHeight > orginLeftHeight) {
+        //         scaleY = Math.max((maxHeight - beginY) /  orginLeftHeight , 1) ;
+        //     }
+        // } else {
+        //      if (maxWidth > orginLeftWidth ) {
+                
+        //      }  
+        //      if (maxHeight > orginLeftHeight) { 
+
+        //     }
+        // }
+        var scale = {scaleX:scaleX,scaleY:scaleY}
 
         return {
             mergeLayerInfos: mergeLayerInfos,
@@ -1081,12 +1319,21 @@ function checkMode()
       if (txtCompoItem == undefined && imgCompoItem == undefined) {
         return 1
       } else {
+        var ratio = getAlphaRatio()
+        //计算一个合适的比例值 0.5 < x <= 1
         return 2
       }
 }
 
-function beginConverter(tempPath)
+function getAlphaRatio()
 {
+
+
+    return 0.5
+}
+
+function beginConverter(tempPath)
+{  
     var compoItem = app.project.activeItem
 
     if (checkValidCompItem(compoItem) == false) {
@@ -1197,6 +1444,10 @@ function startConverter_Alpha(aviPath) {
 
     var width = app.project.activeItem.width;
     var height = app.project.activeItem.height;
+
+    
+
+
     var outputJson = {
             "descript": {
                 "width": width,
