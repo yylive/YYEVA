@@ -30,7 +30,7 @@ YYEVA is a solution further expanded on the basis of the transparent MP4 effect 
 
 ## Platform support
 
-+ Platform：[Android](https://github.com/yylive/YYEVA-Android), [iOS](https://github.com/yylive/YYEVA-iOS), [Web](https://github.com/yylive/YYEVA-Web) 
++ Platform：[Android](https://github.com/yylive/YYEVA-Android), [iOS](https://github.com/yylive/YYEVA-iOS), [Web](https://github.com/yylive/YYEVA-Web) [miniprogram](https://www.npmjs.com/package/yyeva-wechat)
 + Generation Tool : [AE plguin](https://github.com/yylive/YYEVA/tree/main/AEP) 
 + [Data structure](https://github.com/yylive/YYEVA/blob/main/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md)
 + [Docs](https://github.com/yylive/YYEVA)
