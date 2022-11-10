@@ -5,8 +5,7 @@ var OS_VERSION_MAC = 2;
 
 var EFFECT_TAG_TYPE_TEXT = "txt"
 var EFFECT_TAG_TYPE_IMAGE = "img" 
- 
-
+  
 /**
  * 用来生成支持MP4视频插入动态元素的AE脚本
  * Author:Guoyabin YY Inc
@@ -41,6 +40,11 @@ var AECompoItemUtils = (function() {
             if (curLayer.enabled == false){
                 continue;
             }
+
+            if (curLayer.name == MaskCompo_Image || curLayer.name == MaskCompo_Text)  {
+                continue
+            } 
+
             var fillPropertyGroup = curLayer.property("ADBE Effect Parade").property("ADBE Fill")
             if (fillPropertyGroup != undefined) {
                 var colorPropertyGroup = fillPropertyGroup.property("ADBE Fill-0002");
@@ -63,6 +67,11 @@ var AECompoItemUtils = (function() {
                 if (curLayer.enabled == false){
                     continue;
                 }
+
+                if (curLayer.name == MaskCompo_Image || curLayer.name == MaskCompo_Text)  {
+                    continue
+                } 
+
                 //混合选项 混合叠加
                 var layerStylePropertyGroup =  curLayer.property("ADBE Layer Styles")
                 if (layerStylePropertyGroup != undefined) {
@@ -83,36 +92,36 @@ var AECompoItemUtils = (function() {
              var layer1 =  activeItem.layers[1]
              var layer2 =  activeItem.layers[2]
 
+
              var positionContents1 = layer1.property("ADBE Transform Group").property("ADBE Position");
              var x1 = positionContents1.valueAtTime(0, false)[0];
              var positionContents2 = layer2.property("ADBE Transform Group").property("ADBE Position");
              var x2 = positionContents2.valueAtTime(0, false)[0];
+  
+                if (x1 < x2) {
+                    if (layer1.width == layer2.width  && layer1.height == layer2.height && x2 == x1 + layer1.width) {
+                          alphaLayer = layer2
+                    }  
+                    
+                } else {
+                     if (layer1.width == layer2.width  && layer1.height == layer2.height && x1 == x2 + layer1.width) {
+                         alphaLayer = layer1
+                    }   
+                }  
+        }    
+        return alphaLayer
 
-             if (x1 < x2) {
-                alphaLayer = layer2
-             } else {
-                alphaLayer = layer1
-             }
-                     
-        }  
-        return alphaLayer;
     }
 
     AECompoItemUtils.prototype.isValideSelCompForMask = function(activeItem) {
-
-        if (activeItem == null || activeItem == undefined) {
-            alertMessage("请选择一个合成");
-            return false;
-        }
         var alphaLayer = this.findAlphaLayer(activeItem);
-        if (alphaLayer == null || alphaLayer == undefined) {
-            alertMessage("所选图层不合理,请检查遮罩区域");
+        if (alphaLayer == null || alphaLayer == undefined) { 
             return false;
         }
         return true;
     } 
 
-    AECompoItemUtils.prototype.findUsedInCompo = function(compoItem,chainStr) { 
+    AECompoItemUtils.prototype.findUsedInCompo = function(compoItem,chainStr,activeItem) { 
         var usedInItems = compoItem.usedIn 
         logMessage("usedInItems.length:" + usedInItems.length)  
         if(usedInItems.length > 0 ) {
@@ -120,15 +129,15 @@ var AECompoItemUtils = (function() {
              var item = usedInItems[i]  
              logMessage("item.name:" + item.name) 
              if (item != undefined) {
-                 if (item == this.app.project.activeItem) {   
+                 if (item == activeItem) {   
                      //checkVisible
-                     if (this.checkVisible(chainStr)) {
-                        return (this.app.project.activeItem.name  + "->" +  chainStr)    
+                     if (this.checkVisible(chainStr,activeItem)) {
+                        return (activeItem.name  + "->" +  chainStr)    
                      }    
                  } else {
                     logMessage("item.name:" + item.name + ",length:" + item.usedIn.length) 
                      if (item.usedIn.length > 0 )
-                      var subFind = this.findUsedInCompo(item,item.name + "->" + chainStr)  
+                      var subFind = this.findUsedInCompo(item,item.name + "->" + chainStr,activeItem)  
                       if (subFind != undefined) {
                          return subFind
                       }
@@ -139,8 +148,8 @@ var AECompoItemUtils = (function() {
       return undefined
   } 
 
-   AECompoItemUtils.prototype.checkVisible = function(chainArryStr) { 
-        var activeItem = this.app.project.activeItem
+   AECompoItemUtils.prototype.checkVisible = function(chainArryStr,activeItem) { 
+        var activeItem = activeItem
         var chainArry = chainArryStr.split("->") 
         var item = activeItem
         var layerChainEnabled = true
@@ -164,7 +173,8 @@ var AECompoItemUtils = (function() {
 
     
 
-    AECompoItemUtils.prototype.maskCompoWithJudgeName = function(judgeName) {
+    AECompoItemUtils.prototype.maskCompoWithJudgeName = function(judgeName,activeItem) {
+ 
         var collection_item = this.app.project.items;
         var compoItemsCount = collection_item.length; 
         for (var i = 1; i <= compoItemsCount; i++) {
@@ -174,7 +184,7 @@ var AECompoItemUtils = (function() {
                 if (compoItem.name.match(judgeName)) {
                     //分析引用关系    
                     logMessage("开始寻找链条：" + judgeName )
-                    var chain = this.findUsedInCompo(compoItem,judgeName) 
+                    var chain = this.findUsedInCompo(compoItem,judgeName,activeItem) 
                     if (chain != undefined) {
                         logMessage("找到了" + judgeName + ",引用链条为：" + chain)
                         return compoItem;
@@ -294,21 +304,93 @@ var DynamicMp4Conveter = (function() {
          var layers = activeItem.layers; 
     }
 
+    DynamicMp4Conveter.prototype.addSelfAlphaLayer = function(activeItem) {
+
+            //获取当前合成的大小
+            var newOutComp = app.project.items.addComp("YYMP4AE插件输出",activeItem.width * 2,activeItem.height,activeItem.pixelAspect,activeItem.duration,activeItem.frameRate)
+            //创建一个输出合成 ,width = 当前合成的2倍  height = 当前合成 
+            var layer = newOutComp.layers.add(activeItem)
+            var alphaLayer = layer.duplicate()
+ 
+            //调整位置   
+            //左边:layerpositionContents
+            // layerpositionContents.setValueAtTime(0,[450,500])              
+            var layerPropertyGroup = layer.property("ADBE Transform Group");
+            var layerPositionX = layerPropertyGroup.property("Anchor Point").valueAtTime(0,false)[0];
+            var layerPositionY = layerPropertyGroup.property("Anchor Point").valueAtTime(0,false)[1];
+            var layerAnchorPointX = layerPropertyGroup.property("ADBE Position").valueAtTime(0,false)[0];
+            var layerAnchorPointY = layerPropertyGroup.property("ADBE Position").valueAtTime(0,false)[1];
+
+            layerPropertyGroup.property("ADBE Position").setValue([layerPositionX,layerPositionY,0]) 
+            alphaLayer.property("ADBE Transform Group").property("ADBE Position").setValue([layerPositionX+ activeItem.width,layerPositionY,0])
+  
+             
+            //给alpha区域添加一个效果属性   
+            if( alphaLayer.property("ADBE Effect Parade") == undefined && alphaLayer.canAddProperty("ADBE Effect Parade") ) {
+                alphaLayer.addProperty("ADBE Effect Parade")
+            }   
+
+            if( alphaLayer.property("ADBE Effect Parade").property("ADBE Fill")  == undefined && alphaLayer.property("ADBE Effect Parade").canAddProperty("ADBE Fill") ) {
+                alphaLayer.property("ADBE Effect Parade").addProperty("ADBE Fill")
+            }   
+
+            
+
+            if (alphaLayer.property("ADBE Effect Parade").property("ADBE Fill")!=undefined) {
+                var colorPropertyGroup = alphaLayer.property("ADBE Effect Parade").property("ADBE Fill").property("ADBE Fill-0002")
+                if (colorPropertyGroup != undefined) {
+                     colorPropertyGroup.setValue([1.0,1.0,1.0,1.0]) ; 
+                }
+            } else {
+                logMessage("无法添加'效果-颜色'属性") 
+                newOutComp.remove()
+                return undefined
+            }  
+
+            return newOutComp 
+    }
   
     DynamicMp4Conveter.prototype.beginConveter = function(tempPath) {
+   
+        var activeItem = app.project.activeItem
 
         //判断有没有convertMP4模板
-
-        //判断当前选择合成合法性
-        if (!this.compoItemUtils.isValideSelCompForMask(this.activeItem)) {
-            logMessage("查找遮罩区域失败")
-            return undefined;
+         if (activeItem == null || activeItem == undefined) {
+            alertMessage("请选择一个合成");
+            return nil;
         }
+
+        var needCleanCom = false
+
+        var alphaLayer = this.compoItemUtils.findAlphaLayer(activeItem);
+        if (alphaLayer == undefined) { 
+            logMessage("未找到alphaLayer,尝试添加一个AlphaLayer")
+            var newOutComp = this.addSelfAlphaLayer(activeItem) 
+            if (newOutComp == undefined) {
+               alertMessage("Alpha区域创建或添加失败")
+               logMessage("添加一个AlphaLayer失败")
+               return nil     
+            } 
+            logMessage("添加一个AlphaLayer成功")
+            needCleanCom = true
+            activeItem = newOutComp  
+            this.activeItem = newOutComp 
+            this.proj = {
+                name: newOutComp.name,
+                width: newOutComp.width,
+                height: newOutComp.height,
+                duration: newOutComp.duration,
+                frameRate: newOutComp.frameRate,
+                frameCount: newOutComp.frameRate * newOutComp.duration,
+             }; 
+        }    
+
         //获取文字/图像遮罩合成
-        logMessage("开始处理,所选合成为：" + this.activeItem.name)
-  
-        var txtCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text);
-        var imgCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image);
+        logMessage("开始处理,所选合成为：" + activeItem.name)
+ 
+        var txtCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,activeItem);
+        var imgCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,activeItem);
+ 
 
         //分析文字/图像遮罩合成
         var txtMaskInfo = txtCompoItem != undefined ? this.analysisMaskCompo(txtCompoItem) : undefined;
@@ -321,12 +403,15 @@ var DynamicMp4Conveter = (function() {
 
         if (txtMaskInfo != undefined) {
             maskInfoList = maskInfoList.concat(txtMaskInfo)
-        }
-        
+        } 
 
         if (txtMaskInfo == undefined && imgMaskInfo == undefined) {
             logMessage("analysisMaskCompo fail")
             alertMessage("请确保项目中包含 mask_text 或 mask_image 的合成，并有当前所选合成的引用")
+
+            if (needCleanCom) {
+                activeItem.remove()
+            }
             return undefined;
         }
 
@@ -342,10 +427,10 @@ var DynamicMp4Conveter = (function() {
         logMessage("loadMaskSourceInfo complete")
 
         //复制合成
-        var compoItem = this.activeItem.duplicate()
+        var compoItem = activeItem.duplicate()
 
-        var outCompW = this.activeItem.width / 2
-        var outCompH = this.activeItem.height
+        var outCompW = activeItem.width / 2
+        var outCompH = activeItem.height
  
 
         var aspectAlphaRatio  = 0.5
@@ -364,6 +449,9 @@ var DynamicMp4Conveter = (function() {
         if (this.compoItemUtils.scaleAlpha(compoItem,aspectAlphaRatio) == false) {
             alertMessage("缩放alpha区域失败")
             logMessage("scaleAlpha fail")
+            if (needCleanCom) {
+                activeItem.remove()
+            }
             return undefined;
         }
 
@@ -435,9 +523,7 @@ var DynamicMp4Conveter = (function() {
         var mergeLayerInfos = outputInfo.mergeLayerInfos;
         var width = this.proj.width;
         var height = this.proj.height;
-
-        
-
+ 
         var outputJson = {
             "descript": {
                 "width": outputWidthCeil,
@@ -447,7 +533,7 @@ var DynamicMp4Conveter = (function() {
                 "rgbFrame": [0, 0, width * 0.5, height],
                 "alphaFrame": [width * 0.5, 0, width * 0.5 * aspectAlphaRatio, height * aspectAlphaRatio],
                 "fps":this.proj.frameRate,
-                "hasAudio":this.activeItem.hasAudio
+                "hasAudio":activeItem.hasAudio
             },
             "effect": src,
             "datas": mergeLayerInfos.frame,
@@ -474,6 +560,11 @@ var DynamicMp4Conveter = (function() {
             "file": aviFile,
             "evaJson": JSON.stringify(outputJson)
         };
+
+        if (needCleanCom) {
+            activeItem.remove()
+        }
+        
         //渲染
         var json = JSON.stringify(result)
         return json;
@@ -907,7 +998,7 @@ var DynamicMp4Conveter = (function() {
                  var arr = layerName.split('-')
                  var fontColor = undefined
                  var fontSize = undefined
- 
+                 var textAlign = undefined
                  if (arr.length >= 1) {
                     layerName = arr[0]
                  } 
@@ -931,9 +1022,16 @@ var DynamicMp4Conveter = (function() {
                      fontSize = arr[2]
                      var fontSizeRegExp = /^[0-9]+$/i; 
                      var sc = fontSizeRegExp.test(fontSize)?1:0; //判断字体大小合法性
-                     if (valid != 1) {
+                     if (sc != 1) {
                         fontSize = undefined 
                      }
+                 } 
+
+                 if (arr.length >= 4) {
+                     textAlign = arr[3]  
+                     if (textAlign != "left" && textAlign != "right" && textAlign != "center") {
+                        textAlign = undefined 
+                     } 
                  } 
 
                 src["effectTag"] = layerName; 
@@ -945,6 +1043,11 @@ var DynamicMp4Conveter = (function() {
                 if (fontSize != undefined) {
                     src["fontSize"] = parseInt(fontSize); 
                 }  
+
+                if (textAlign != undefined) { 
+                    src["textAlign"] =  textAlign
+                }   
+                
             } else if (EFFECT_TAG_TYPE_IMAGE){
 
                  //key-fontColor-fontSize
@@ -1313,8 +1416,8 @@ function checkMode()
 {
      //判断当前是否有mask引用
       var compoItemUtils = new AECompoItemUtils(app);
-      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text);
-      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image);
+      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,app.project.activeItem);
+      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,app.project.activeItem);
 
       if (txtCompoItem == undefined && imgCompoItem == undefined) {
         return 1
@@ -1391,10 +1494,10 @@ function startConverter_Effect(tempPath) {
 function checkMaskWidthHeight()
 {
       var compoItemUtils = new AECompoItemUtils(app);
-      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text);
-      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image);
+      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,app.project.activeItem);
+      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,app.project.activeItem);
  
-
+      
       var activeWidth = app.project.activeItem.width
       var activeHeight = app.project.activeItem.height
  
@@ -1402,23 +1505,26 @@ function checkMaskWidthHeight()
           var txtWidth = txtCompoItem.width
           var txtHeight = txtCompoItem.height
 
-          if (Math.floor(txtWidth) != Math.floor(activeWidth / 2) || txtHeight !=  activeHeight){
-                alertMessage("mask_text合成的宽高不符合规范，请检查mask_text合成的宽高为输出合成宽的一半");
-                return false 
+          if (Math.floor(txtWidth) != Math.floor(activeWidth / 2) || txtHeight !=  activeHeight){ 
+                if ((Math.floor(txtWidth) != Math.floor(activeWidth)) || txtHeight !=  activeHeight){
+                    alertMessage("mask_text合成的宽高不符合规范，请检查mask_text合成的宽高");
+                    return false 
+                }
           }
        
       }
 
        if (imgCompoItem!=undefined && imgCompoItem!=null) {
           var imgWidth = imgCompoItem.width
-          var imgHeight = imgCompoItem.height
- 
+          var imgHeight = imgCompoItem.height 
           if (Math.floor(imgWidth) != Math.floor(activeWidth / 2) ||  imgHeight!= activeHeight){
-                alertMessage("mask_image合成的宽高不符合规范，请检查mask_image合成的宽高为输出合成高的一半");
-                return false
+ 
+             if ((Math.floor(imgWidth) != Math.floor(activeWidth)) || imgHeight !=  activeHeight){
+                    alertMessage("mask_image合成的宽高不符合规范，请检查mask_image合成的宽高");
+                    return false
+                }  
           }  
-      }
-
+      } 
 
      return true
 
@@ -1444,10 +1550,7 @@ function startConverter_Alpha(aviPath) {
 
     var width = app.project.activeItem.width;
     var height = app.project.activeItem.height;
-
-    
-
-
+ 
     var outputJson = {
             "descript": {
                 "width": width,
