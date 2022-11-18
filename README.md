@@ -19,7 +19,9 @@
 
 请支持我们的项目，点击 GitHub Star, 让更多的人看到该项目
   
-## 效果演示
+## 效果演示 
+
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/jy_review.gif" width = "424" height = "442" alt="图片名称" align=center />
   
   <img src="https://github.com/yylive/YYEVA/blob/main/img/teampk.gif" width = "424" height = "898" alt="图片名称" align=center />
   
