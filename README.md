@@ -21,10 +21,9 @@
   
 ## 效果演示 
 
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/jy_review.gif" width = "424" height = "442" alt="图片名称" align=center />
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/jy_review.gif" width = "421" height = "442" alt="图片名称" align=center /> <img src="https://github.com/yylive/YYEVA/blob/main/img/out_3.gif" width = "421" height = "442" alt="图片名称" align=center />
   
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/out_1.gif" width = "421" height = "673" alt="图片名称" align=center />
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/out_2.gif" width = "466" height = "673" alt="图片名称" align=center />
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/out_1.gif" width = "421" height = "673" alt="图片名称" align=center /> <img src="https://github.com/yylive/YYEVA/blob/main/img/out_2.gif" width = "500" height = "673" alt="图片名称" align=center />
   
 ## YYEVA工具链 工作流程
 
