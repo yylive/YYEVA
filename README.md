@@ -20,10 +20,19 @@
 请支持我们的项目，点击 GitHub Star, 让更多的人看到该项目
   
 ## 效果演示 
- 
-  <video width="672" height="704" controls>
-    <source  src="https://github.com/yylive/YYEVA/blob/main/img/out.mp4" type="video/mp4">
-  </video>
+
+
+https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-b27d-4ce823eced9e.mp4
+
+
+
+
+
+https://user-images.githubusercontent.com/14030762/203517222-c82d099e-7d96-4084-ae7f-36688aad5632.mp4
+
+
+
+
 
 
 ## YYEVA工具链 工作流程
