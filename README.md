@@ -20,15 +20,12 @@
 请支持我们的项目，点击 GitHub Star, 让更多的人看到该项目
   
 ## 效果演示 
+ 
+  <video width="672" height="704" controls>
+    <source  src="https://github.com/yylive/YYEVA/blob/main/img/out.mp4" type="video/mp4">
+  </video>
 
-  <iframe height=498 width=510 src="./img/demo_ufo.mov">
 
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/jy_review.gif" width = "421" height = "442" alt="图片名称" align=center /> 
-  
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/out_3.gif" width = "421" height = "442" alt="图片名称" align=center />
-  
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/out_2.gif" width = "500" height = "673" alt="图片名称" align=center />
-  
 ## YYEVA工具链 工作流程
 
   <img src="https://github.com/yylive/YYEVA/blob/main/img/ae_timeline.png" width = "754" height = "369" alt="图片名称" align=center />
