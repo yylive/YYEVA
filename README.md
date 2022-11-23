@@ -24,6 +24,8 @@
 
 <img src="./img/out.gif" width = "336" height = "352" alt="图片名称" align=center /> 
 
+<img src="./img/out_3.gif" width = "399" height = "428" alt="图片名称" align=center /> 
+
 <img src="./img/out_2.gif" width = "256" height = "357" alt="图片名称" align=center /> 
  
 
