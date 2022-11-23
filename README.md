@@ -25,9 +25,9 @@ Gif:
 
 <img src="./img/out.gif" width = "336" height = "352" alt="图片名称" align=center /> 
 
-图片：
+视频：
 
-https://user-images.githubusercontent.com/14030762/203517222-c82d099e-7d96-4084-ae7f-36688aad5632.mp4
+https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-b27d-4ce823eced9e.mp4
 
 
 <!-- 
