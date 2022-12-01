@@ -11,6 +11,11 @@ var EFFECT_TAG_TYPE_IMAGE = "img"
  * Author:Guoyabin YY Inc
  */
  
+ var confirmMessage = function (message) {
+    return confirm(message);
+}
+ 
+ 
 var AECompoItemUtils = (function() {
     function AECompoItemUtils(app) {
         this.app = app;

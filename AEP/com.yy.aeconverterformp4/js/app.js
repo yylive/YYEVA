@@ -6,11 +6,13 @@
 
 var csInterface = new CSInterface();
 var nodePath = require("path");
-var fs = require('fs')
+
 var curExtensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
 var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
 var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
-
+var fs = require('fs')
+var spawn = require('child_process');
+var request = require('request');
 var AdmZip = require("adm-zip");
 var CURRENT_FILE_PATH;
 var CURRENT_SOURCE_NAME;
@@ -50,7 +52,48 @@ var currentChanegFile = "logs ";
 
 var progress = 0;
 
+function downloadFile(uri, filename, callback) { 
+    var stream = fs.createWriteStream(filename);  
+    request(uri).pipe(stream).on('close', callback);
+}
 
+function downloadFileNeedProgress(uri, filename, callback, progress) { 
+    var stream = fs.createWriteStream(filename);  
+    request(uri).pipe(stream).on('close', callback);
+}
+
+function confirmMessages(message, callbackTrue, callbackFalse) {
+    csInterface.evalScript("confirmMessage('" + message + "');", function (result) {
+
+        if (result == 'true') {
+            callbackTrue();
+
+        } else {
+            callbackFalse();
+        }
+    });
+}
+
+
+          
+function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
+
+    if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach(function (file) {
+            var curPath = nodePath.join(path, file);
+            if (fs.statSync(curPath).isDirectory()) { // recurse
+                deleteFloder(curPath, false, true);
+        } else { // delete file
+            fs.unlinkSync(curPath);
+        } });
+        if (!isFirstFolder || delFirstFolder) {
+            fs.rmdirSync(path);
+        }
+    }
+    if (isFirstFolder) {
+        callback();
+    }
+}
 
 function aeLogMessageEvent(myEvent){ 
     var logStr = myEvent.data;
@@ -431,6 +474,12 @@ function replaceSuffix(originUrl,extentionPath) {
 function showModalTip(needShow) {
     var showStr = needShow ? "visible" : "hidden";
     document.getElementById('modal-overlay').style.visibility = showStr;
+}
+
+function showModalUpgradeTip(needShow,text) { 
+    var showStr = needShow ? "visible" : "hidden"; 
+    document.getElementById('modal-upgrade-overlay').style.visibility = showStr;
+    document.getElementById('transform-upgrade-tips').innerText = text;
 }
 
 function showModalLogTip(needShow) {
