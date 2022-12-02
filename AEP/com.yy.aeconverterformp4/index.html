@@ -36,9 +36,10 @@
         var infoName = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), '.versionFile');
 
         //check 版本
-        showModalUpgradeTip(true,"检测升级中,请稍后")
-  
-        downloadFile(infoUrl, infoName, function () {   
+        
+        window.onload = function() {　　　　
+			showModalUpgradeTip(true,"检测升级中,请稍后")
+            downloadFile(infoUrl, infoName, function () {   
             var newestVersion = parseInt(fs.readFileSync(infoName, 'utf-8'));
             var CURRENT_PROJECT_PATH = csInterface.getSystemPath(SystemPath.APPLICATION);
             var saveVersFile = nodePath.join(CURRENT_PROJECT_PATH, 'versionFile')
@@ -118,6 +119,8 @@
                 });
             }
         });
+            
+		} 
 
     </script> 
      
