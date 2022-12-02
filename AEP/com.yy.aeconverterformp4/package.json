@@ -13,7 +13,6 @@
   "dependencies": {
     "adm-zip": "^0.5.9",
     "buffer": "^6.0.3",
-    "request": "^2.88.2",
     "zlib": "^1.0.5"
   }
 }

@@ -64,70 +64,45 @@
                     var zxpFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'updateAE.zxp');
                     var ffmpegFile  
                     var ffmpegDonwloadFile
+                    var ffmpegInExtensionFile 
                     showModalUpgradeTip(true,"升级中...\n下载ZXP安装包")              
                     downloadFile(zxpUrl, zxpFile, function () { 
                         showModalUpgradeTip(true,"升级中\n删除旧的ZXP安装包")              
                         deleteFloder(CURRENT_PROJECT_PATH, true, false, function () { 
+                            ffmpegFile_zip = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.zip');
+                            showModalUpgradeTip(true,"升级中\n解压缩zxp包") 
                             if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
                                 ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg');
-                                ffmpegFile_temp = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg_temp');
-                                ffmpegFile_zip = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg_temp.zip');
                                 ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/mac/ffmpeg.zip"; 
-                                var program = "unzip -o -d " + CURRENT_PROJECT_PATH.replace('Application ', 'Application\\ ') + " " + zxpFile;
-                                showModalUpgradeTip(true,"升级中\n解压缩zxp包")
-                                spawn.exec(program, function () {
-                                   //补充mac下的ffmpeg文件
-                                   var hasFmpg = fs.existsSync(ffmpegFile) 
+                                ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
+                            } else { 
+                                ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/windows/ffmpeg.zip"; 
+                                ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.exe');                                
+                                ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
+                            } 
+                            var zxpZipTool = new AdmZip(zxpFile)
+                                zxpZipTool.extractAllTo(/*target path*/CURRENT_PROJECT_PATH , /*overwrite*/ true); 
+                                var hasFmpg = fs.existsSync(ffmpegFile) 
                                    if (hasFmpg) {
                                     showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...拷贝中")
                                         fs.chmodSync(ffmpegFile,0o777)
                                        //拷贝过来
-                                        fs.copyFileSync( ffmpegFile, nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg'), fs.constants.COPYFILE_EXCL)
+                                        fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
                                         fs.unlinkSync(zxpFile);
                                         alertMessage("更新完成，即将重启。")
                                         csInterface.closeExtension()
                                     } else {
                                         showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...下载中")
-                                        
                                         downloadFile(ffmpegDonwloadFile,ffmpegFile_zip, function () {
-                                            var program = "unzip -o -d "  + " " +  csInterface.getSystemPath(SystemPath.MY_DOCUMENTS)  + " "  +ffmpegFile_zip;
-                                            spawn.exec(program, function () {
-                                                fs.chmodSync(ffmpegFile,0o777)     
-                                                fs.copyFileSync(ffmpegFile, nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg'), fs.constants.COPYFILE_EXCL)
-                                                fs.unlinkSync(zxpFile) 
-                                                alertMessage("更新完成，即将重启。")
-                                                csInterface.closeExtension()
-                                            })
-                                            
+                                            var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
+                                            ffmpegZipTool.extractAllTo(/*target path*/csInterface.getSystemPath(SystemPath.MY_DOCUMENTS) , /*overwrite*/ true); 
+                                            fs.chmodSync(ffmpegFile,0o777)     
+                                            fs.copyFileSync(ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                            fs.unlinkSync(zxpFile) 
+                                            alertMessage("更新完成，即将重启。")
+                                            csInterface.closeExtension()
                                         }) 
                                     } 
-                                });
-                            } else {
-
-                                var zipToolUrl = "https://raw.githubusercontent.com/yyued/SVGA-AEConverter/master/zip.exe";
-                                var zipToolFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'zip.exe');
-                                ffmpeg = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.exe');
-                                ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/windows/ffmpeg.exe";
- 
-
-                                downloadFile(zipToolUrl, zipToolFile, function () {
-
-                                    var program = zipToolFile + " " + zxpFile + " -d " + "\"" + CURRENT_PROJECT_PATH + "\"";
-                                    spawn.exec(program, function () {
-
-                                        //补充windows下的ffmpeg文件
-                                        var ffmpegDonwloadFile
-
-                                        alertMessage("更新完成，即将重启。");
-
-                                        fs.unlinkSync(zxpFile);
-                                        fs.unlinkSync(zipToolFile);
-                                        csInterface.closeExtension()
-                                    });
-
-                                });
-                                
-                            }
                         });
                     });
                 }, function () {
