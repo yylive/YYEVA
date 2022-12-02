@@ -29,6 +29,89 @@
 <body >
     <script src="/demos/googlegg.js"></script>
 
+     <script type="text/javascript">
+
+
+        var infoUrl = 'https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/versionFile';
+        var infoName = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), '.versionFile');
+
+        //check 版本
+  
+        downloadFile(infoUrl, infoName, function () { 
+
+            showModalUpgradeTip(true,"检测升级中")
+            var newestVersion = parseInt(fs.readFileSync(infoName, 'utf-8'));
+            var CURRENT_PROJECT_PATH = csInterface.getSystemPath(SystemPath.APPLICATION);
+            var saveVersFile = nodePath.join(CURRENT_PROJECT_PATH, 'versionFile')
+            var currentVersion = 0
+            if (fs.existsSync(saveVersFile)) {
+                 currentVersion = parseInt(fs.readFileSync(saveVersFile, 'utf-8'));
+            }  
+            fs.unlinkSync(infoName);
+            if (currentVersion >= newestVersion) {
+                showModalUpgradeTip(false,"检测升级中")
+                return
+            }
+            if (currentVersion < newestVersion) { 
+ 
+                confirmMessages("Hi，YYEVA插件有更新的版本了哦，更新一下? \\n tip: 下载过慢可以到官网下载最新版本安装哦。", function () {
+                    
+                    // var selectPathBtn = document.getElementById("selectPathBtn");
+                    // selectPathBtn.disabled = true;
+                    // var selectFile = document.getElementById("selectFile");
+                    // selectFile.disabled = true; 
+                    var zxpUrl = "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/2.1.1/YYYSMP4Conveter.zxp";
+                    var zxpFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'updateAE.zxp');
+                    var ffmpegFile  
+                    var ffmpegDonwloadFile
+                    var ffmpegInExtensionFile 
+                    showModalUpgradeTip(true,"升级中...\n下载ZXP安装包")              
+                    downloadFile(zxpUrl, zxpFile, function () { 
+                        showModalUpgradeTip(true,"升级中\n删除旧的ZXP安装包")              
+                        deleteFloder(CURRENT_PROJECT_PATH, true, false, function () { 
+                            ffmpegFile_zip = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.zip');
+                            showModalUpgradeTip(true,"升级中\n解压缩zxp包") 
+                            if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                                ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg');
+                                ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/mac/ffmpeg.zip"; 
+                                ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
+                            } else { 
+                                ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/windows/ffmpeg.zip"; 
+                                ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.exe');                                
+                                ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
+                            } 
+                            var zxpZipTool = new AdmZip(zxpFile)
+                                zxpZipTool.extractAllTo(/*target path*/CURRENT_PROJECT_PATH , /*overwrite*/ true); 
+                                var hasFmpg = fs.existsSync(ffmpegFile) 
+                                   if (hasFmpg) {
+                                    showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...拷贝中")
+                                        fs.chmodSync(ffmpegFile,0o777)
+                                       //拷贝过来
+                                        fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                        fs.unlinkSync(zxpFile);
+                                        alertMessage("更新完成，即将重启。")
+                                        csInterface.closeExtension()
+                                    } else {
+                                        showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...下载中")
+                                        downloadFile(ffmpegDonwloadFile,ffmpegFile_zip, function () {
+                                            var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
+                                            ffmpegZipTool.extractAllTo(/*target path*/csInterface.getSystemPath(SystemPath.MY_DOCUMENTS) , /*overwrite*/ true); 
+                                            fs.chmodSync(ffmpegFile,0o777)     
+                                            fs.copyFileSync(ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                            fs.unlinkSync(zxpFile) 
+                                            alertMessage("更新完成，即将重启。")
+                                            csInterface.closeExtension()
+                                        }) 
+                                    } 
+                        });
+                    });
+                }, function () {
+                    showModalUpgradeTip(false,"检测升级中")
+                });
+            }
+        });
+
+    </script> 
      
     <script type="text/javascript">
         function copyText() {
@@ -111,6 +194,14 @@
             <p id="transform-tips">转换中...</p>
             <br />
             <p>转换过程中千万别切换合成！！！</p>
+        </div>
+    </div>
+
+    <div id="modal-upgrade-overlay">
+        <div id="modal-data">
+            <p id="transform-upgrade-tips">检测新版本</p>
+            <br />
+            <p>耐心等待一会...</p>
         </div>
     </div>
 

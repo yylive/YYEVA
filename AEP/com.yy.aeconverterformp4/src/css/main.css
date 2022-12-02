@@ -102,7 +102,7 @@
 
 
 /* 定义模态对话框外面的覆盖层样式 */
-#modal-overlay,#modal-log-overlay {
+#modal-overlay,#modal-log-overlay,#modal-upgrade-overlay {
     visibility: hidden;
     position: absolute;
     /* 使用绝对定位或固定定位  */

@@ -6,12 +6,15 @@
 
 var csInterface = new CSInterface();
 var nodePath = require("path");
-var fs = require('fs')
+
 var curExtensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
 var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
 var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
-
+var fs = require('fs')
+var spawn = require('child_process'); 
 var AdmZip = require("adm-zip");
+https = require('https');
+
 var CURRENT_FILE_PATH;
 var CURRENT_SOURCE_NAME;
 var TEMP_SOURCE_PATH;
@@ -26,6 +29,7 @@ var YYEVA_CUR_WRITE_STYLE = YYEVA_WRITE_STYLE_METADATA;
 var CEP_Plugin_Version;
 var customer_crf = 23; 
 
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
 
 var MP4EnCodeLevel = {
     low: 0,
@@ -50,7 +54,59 @@ var currentChanegFile = "logs ";
 
 var progress = 0;
 
+function downloadFile(url, filename, callback) { 
+    // var stream = fs.createWriteStream(filename);  
+    // request(uri).pipe(stream).on('close', callback);
 
+    https.get(url, (res) => {
+        // Open file in local filesystem
+        const file = fs.createWriteStream(filename);
+        // Write data into local file
+        res.pipe(file);
+        // Close the file
+        file.on('finish', () => {
+            file.close();
+            console.log(`File downloaded!`);
+            callback()
+        });
+    }).on("error", (err) => {
+        console.log("Error: ", err.message);
+    });
+}
+
+
+function confirmMessages(message, callbackTrue, callbackFalse) {
+    csInterface.evalScript("confirmMessage('" + message + "');", function (result) {
+
+        if (result == 'true') {
+            callbackTrue();
+
+        } else {
+            callbackFalse();
+        }
+    });
+}
+
+
+          
+function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
+
+    if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach(function (file) {
+            var curPath = nodePath.join(path, file);
+            if (fs.statSync(curPath).isDirectory()) { // recurse
+                deleteFloder(curPath, false, true);
+        } else { // delete file
+            fs.unlinkSync(curPath);
+        } });
+        if (!isFirstFolder || delFirstFolder) {
+            fs.rmdirSync(path);
+        }
+    }
+    if (isFirstFolder) {
+        callback();
+    }
+}
 
 function aeLogMessageEvent(myEvent){ 
     var logStr = myEvent.data;
@@ -431,6 +487,12 @@ function replaceSuffix(originUrl,extentionPath) {
 function showModalTip(needShow) {
     var showStr = needShow ? "visible" : "hidden";
     document.getElementById('modal-overlay').style.visibility = showStr;
+}
+
+function showModalUpgradeTip(needShow,text) { 
+    var showStr = needShow ? "visible" : "hidden"; 
+    document.getElementById('modal-upgrade-overlay').style.visibility = showStr;
+    document.getElementById('transform-upgrade-tips').innerText = text;
 }
 
 function showModalLogTip(needShow) {
