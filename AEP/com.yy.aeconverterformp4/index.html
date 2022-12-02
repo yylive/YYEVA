@@ -74,7 +74,7 @@
                             if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
                                 ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg');
                                 ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/mac/ffmpeg.zip"; 
-                                ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
+                                ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg').replace('Application ', 'Application\\ ')
                             } else { 
                                 ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/windows/ffmpeg.zip"; 
                                 ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.exe');                                
@@ -87,20 +87,29 @@
                                     showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...拷贝中")
                                         fs.chmodSync(ffmpegFile,0o777)
                                        //拷贝过来
+                                       try{
+
                                         fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
                                         fs.unlinkSync(zxpFile);
                                         alertMessage("更新完成，即将重启。")
                                         csInterface.closeExtension()
+                                       } catch (e) {
+                                        alertMessage(e)
+                                       }
                                     } else {
                                         showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...下载中")
                                         downloadFile(ffmpegDonwloadFile,ffmpegFile_zip, function () {
                                             var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
                                             ffmpegZipTool.extractAllTo(/*target path*/csInterface.getSystemPath(SystemPath.MY_DOCUMENTS) , /*overwrite*/ true); 
                                             fs.chmodSync(ffmpegFile,0o777)     
-                                            fs.copyFileSync(ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
-                                            fs.unlinkSync(zxpFile) 
-                                            alertMessage("更新完成，即将重启。")
-                                            csInterface.closeExtension()
+                                            try{ 
+                                                fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                                fs.unlinkSync(zxpFile);
+                                                alertMessage("更新完成，即将重启。")
+                                                csInterface.closeExtension()
+                                                } catch (e) {
+                                                alertMessage(e)
+                                                }
                                         }) 
                                     } 
                         });
