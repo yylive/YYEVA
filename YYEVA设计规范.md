@@ -37,7 +37,7 @@
 
  [视频5:YYEVA-制作mask_image](https://haokan.baidu.com/v?vid=3618349934251838627)
  
- [视频6:YYEVA-如何安装或更新CEP插件](https://www.bilibili.com/video/BV1ia411R7Dn/)
+ [视频6:YYEVA-如何安装插件](https://www.bilibili.com/video/BV1ia411R7Dn/)
  
 
 
