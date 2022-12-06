@@ -47,13 +47,26 @@
                 if (fs.existsSync(saveVersFile)) {
                     currentVersion = parseInt(fs.readFileSync(saveVersFile, 'utf-8'));
                 }  
-                fs.unlinkSync(infoName);
-                if (currentVersion >= newestVersion) {
+                fs.unlinkSync(infoName)
+                var fmpagBefore =  nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
+                //判断是否包含ffmpeg文件
+                if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                    fmpagBefore = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
+                }  
+
+                var hasNewVersion =  currentVersion < newestVersion
+                
+                if (!fs.existsSync(fmpagBefore)) {
+                    hasNewVersion = true
+                } 
+
+                if (!hasNewVersion) {
                     showModalUpgradeTip(false,"检测升级中")
                     return
                 }
-                if (currentVersion < newestVersion) { 
-    
+               
+                
+                if (hasNewVersion) {  
                     confirmMessages("Hi，YYEVA插件有更新的版本了哦，更新一下? \\n tip: 下载过慢可以到官网下载最新版本安装哦。", function () {
                         // var selectPathBtn = document.getElementById("selectPathBtn");
                         // selectPathBtn.disabled = true;
