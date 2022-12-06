@@ -97,3 +97,9 @@ https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-
 ![qqgroup](https://github.com/yylive/YYEVA/blob/main/img/qqgroup.png)
 
 
+
+## 鸣谢
+
+[![Stargazers repo roster for @yylive/yyeva](https://reporoster.com/stars/dark/yylive/yyeva)](https://github.com/yylive/yyeva/stargazers)
+
+[![Forkers repo roster for @yylive/yyeva](https://reporoster.com/forks/dark/yylive/yyeva)](https://github.com/yylive/yyeva/network/members)
