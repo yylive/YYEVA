@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+
+<head>
+    <meta http-equiv="content-type" content="text/html" charset="UTF-8">
+    <link href="src/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="src/css/main.css" rel="stylesheet" type="text/css" />
+    <script src="src/assets/jquery.min.js"></script>
+    <script src="src/assets/jquery.SuperSlide.2.1.1.js"></script>
+
+</head>
+
+
+<script type="text/javascript" src="./src/helpers/CSInterface.js"></script>
+<script type="text/javascript" src="./src/helpers/CSInterfaceHelper.js"></script>
+
+
+<script type="text/javascript" src="js/app.js"></script>
+
+
+<script type="text/javascript">
+    loadJSX("transform.jsx");
+    loadJSX("utils.jsx");
+    function alertMessage(message) {
+        csInterface.evalScript("alertMessage('" + message + "');");
+    }
+</script>
+
+<body">
+    <script src="/demos/googlegg.js"></script>
+    
+    
+    <div class="set-content">
+        <!--    <div style="height: 40px;"></div>-->
+        <div class="set-title hd">
+            <ul class="clearfix">
+                <li class="on">HelloWorld</li>  
+            </ul>
+        </div>
+        <div class="set-middle bd">
+            <ul class="set-middle-item">
+                <li> 
+                    <div role="tabpanel" class="tab-pane fade in active" id="Section1"> 
+                    </div>
+                </li>
+            </ul> 
+
+        </div>
+    </div>
+  
+</body>
+
+</html>

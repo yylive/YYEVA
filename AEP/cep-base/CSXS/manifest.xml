@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<ExtensionManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="6.0" ExtensionBundleId="com.yyeva.aecepdemo" ExtensionBundleVersion="1.0.0" ExtensionBundleName="YYEVADemo">
+    <ExtensionList>
+        <Extension Id="com.yyeva.aecepdemo" Version="1.0.0"/>
+    </ExtensionList>
+    <ExecutionEnvironment>
+        <HostList>
+
+            <!--支持的宿主应用列表和版本-->
+            <Host Name="AEFT" Version="[13.0,99.9]" />
+            <Host Name="AEFX" Version="[13.0,99.9]" />
+
+            <!-- Illustrator -->
+            <!-- <Host Name="ILST" Version="[18.0,18.9]" />-->
+            <!-- InDesign -->
+            <!-- <Host Name="IDSN" Version="[10.0,10.9]" /> -->
+            <!-- Premiere -->
+            <!-- <Host Name="PPRO" Version="[8.0,8.9]" /> -->
+            <!-- AfterEffects -->
+            <!--<Host Name="AEFT" Version="[13.0,15.9]"/>-->
+            <!--<Host Name="AEFX" Version="[13.0,15.9]"/>-->
+            <!-- PRELUDE -->
+            <!-- <Host Name="PRLD" Version="[3.0,3.9]" />   -->
+            <!-- FLASH Pro -->
+            <!--<Host Name="FLPR" Version="[14.0,18.9]" />-->
+
+        </HostList>
+        <LocaleList>
+            <Locale Code="All"/>
+        </LocaleList>
+        <RequiredRuntimeList>
+            <RequiredRuntime Name="CSXS" Version="6.0"/>
+        </RequiredRuntimeList>
+    </ExecutionEnvironment>
+    <DispatchInfoList>
+        <Extension Id="com.yyeva.aecepdemo">
+            <DispatchInfo>
+                <Resources>
+                    <MainPath>./index.html</MainPath>
+                    <!--静态引入jsx文件 也可以动态引入  #include -->
+                    <ScriptPath>./jsx/host.jsx</ScriptPath>
+                    <CEFCommandLine>
+                        <Parameter>--enable-nodejs</Parameter>
+                        <Parameter>--mixed-context</Parameter>
+                    </CEFCommandLine>
+                </Resources>
+                <Lifecycle>
+                    <!-- 设置扩展面板为可视 -->
+                    <AutoVisible>true</AutoVisible>
+                    <!--<StartOn></StartOn>-->
+                    <!-- 打开程序的时候自启动插件 -->
+                </Lifecycle>
+                <UI>
+                    <Type>Modeless</Type>
+                     <!-- 设置扩展显示为面板模式-->
+                    <Menu>YYEVA-CEP-Demo</Menu> 
+                    <!-- 设置扩展标题-->
+                    <Geometry> 
+                        <!-- 设置面板尺寸 -->
+                        <Size>
+                            <Width>470</Width>
+                            <Height>530</Height>
+                        </Size>
+                        <MinSize>
+                            <Width>470</Width>
+                            <Height>530</Height>
+                        </MinSize>
+                        <MaxSize>
+                            <Width>470</Width>
+                            <Height>530</Height>
+                        </MaxSize>
+                    </Geometry> 
+                    <Icons/>
+                </UI>
+            </DispatchInfo>
+        </Extension>
+    </DispatchInfoList>
+</ExtensionManifest>
