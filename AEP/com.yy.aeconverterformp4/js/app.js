@@ -10,6 +10,7 @@ var nodePath = require("path");
 var curExtensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
 var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
 var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
+var aePluginLogFile =  nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'aepluginLog.txt');
 var fs = require('fs')
 var spawn = require('child_process'); 
 var AdmZip = require("adm-zip");
@@ -54,6 +55,8 @@ var currentChanegFile = "logs ";
 
 var progress = 0;
 
+
+
 function downloadFile(url, filename, callback) { 
     // var stream = fs.createWriteStream(filename);  
     // request(uri).pipe(stream).on('close', callback);
@@ -90,22 +93,32 @@ function confirmMessages(message, callbackTrue, callbackFalse) {
 
           
 function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
-
-    if (fs.existsSync(path)) {
-        fs.readdirSync(path).forEach(function (file) {
-            var curPath = nodePath.join(path, file);
-            if (fs.statSync(curPath).isDirectory()) { // recurse
-                deleteFloder(curPath, false, true);
-        } else { // delete file
-            fs.unlinkSync(curPath);
-        } });
-        if (!isFirstFolder || delFirstFolder) {
-            fs.rmdirSync(path);
+    try {
+        if (fs.existsSync(path)) {
+            fs.readdirSync(path).forEach(function (file) {
+                var curPath = nodePath.join(path, file);
+                if (fs.statSync(curPath).isDirectory()) { // recurse
+                    deleteFloder(curPath, false, true);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            } });
+            if (!isFirstFolder || delFirstFolder) {
+                fs.rmdirSync(path);
+            }
+        }
+        if (isFirstFolder) {
+            callback();
+        }
+    } catch (e) {
+        if (isFirstFolder) {
+           aePluginLog("path:" + path + "写入失败,error:" + e) 
+        }
+    } finally {
+        if (isFirstFolder) {
+            callback();
         }
     }
-    if (isFirstFolder) {
-        callback();
-    }
+    
 }
 
 function aeLogMessageEvent(myEvent){ 
@@ -867,6 +880,13 @@ function logFile(logText) {
     //格式
     fs.appendFileSync(outputFile, getBaseLog(true)  + logText + '\n' + '\n')
 }
+
+function aePluginLog(logText) {
+    //格式
+    fs.appendFileSync(aePluginLogFile, '[aelog]>>>'  + logText + '\n')
+}
+
+
 
 function logJSXFile(logText) {
     var outputFile = LOG_PATH + pathSeprator() + currentChanegFile

@@ -32,39 +32,57 @@
 
      <script type="text/javascript">
 
-
+ 
         function checkUpradeIfNeed(){ 
+            
+            if (fs.existsSync(aePluginLogFile)) {
+                fs.unlinkSync(aePluginLogFile)
+                aePluginLog("插件日志：" + aePluginLogFile + "删除成功")
+            } 
             var infoUrl = 'https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/versionFile';
             var infoName = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), '.versionFile');
-
+            aePluginLog("开始下载VersionFile文件：" + infoUrl)
             //check 版本
-            downloadFile(infoUrl, infoName, function () {  
-                showModalUpgradeTip(true,"检测升级中")
-                var newestVersion = parseInt(fs.readFileSync(infoName, 'utf-8'));
+            downloadFile(infoUrl, infoName, function () {   
+                showModalUpgradeTip(true,"检测升级中") 
+                var newestVersion = 0
+                var currentVersion = 0
+                if (fs.existsSync(infoName)) {
+                    newestVersion = parseInt(fs.readFileSync(infoName, 'utf-8'));
+                } 
+                aePluginLog("versionFile文件下载完成：" + infoName + ",newestVersion:" + newestVersion )
                 var CURRENT_PROJECT_PATH = csInterface.getSystemPath(SystemPath.APPLICATION);
                 var saveVersFile = nodePath.join(CURRENT_PROJECT_PATH, 'versionFile')
-                var currentVersion = 0
+                
                 if (fs.existsSync(saveVersFile)) {
                     currentVersion = parseInt(fs.readFileSync(saveVersFile, 'utf-8'));
                 }  
-                fs.unlinkSync(infoName)
+                aePluginLog("version对比 newestVersion:" + newestVersion + "----currentVersion:" + currentVersion ) 
+                if (fs.existsSync(infoName)) {
+                    fs.unlinkSync(infoName)
+                } 
                 var fmpagBefore =  nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
                 //判断是否包含ffmpeg文件
                 if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
                     fmpagBefore = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
                 }  
-
+                
                 var hasNewVersion =  currentVersion < newestVersion
                 
                 if (!fs.existsSync(fmpagBefore)) {
+                    aePluginLog("fmpagBefore不存在，强制再下载一遍 no exits fmpagBefore" ) 
                     hasNewVersion = true
                 } 
 
                 if (!hasNewVersion) {
+                    aePluginLog("已经是最新版本，无需升级" ) 
                     showModalUpgradeTip(false,"检测升级中")
                     return
                 }
-               
+
+                aePluginLog("fmpagBefore文件地址:" + fmpagBefore ) 
+
+                aePluginLog("hasNewVersion：" + hasNewVersion )  
                 
                 if (hasNewVersion) {  
                     confirmMessages("Hi，YYEVA插件有更新的版本了哦，更新一下? \\n tip: 下载过慢可以到官网下载最新版本安装哦。", function () {
@@ -77,10 +95,15 @@
                         var ffmpegFile  
                         var ffmpegDonwloadFile
                         var ffmpegInExtensionFile 
-                        showModalUpgradeTip(true,"升级中...\n下载ZXP安装包")              
+                        showModalUpgradeTip(true,"升级中...\n下载ZXP安装包")      
+                        aePluginLog("begin Donwload zxpUrl:" + zxpUrl)         
+                        aePluginLog("下载的地址:zxpFile:" + zxpFile)         
                         downloadFile(zxpUrl, zxpFile, function () { 
-                            showModalUpgradeTip(true,"升级中\n删除旧的ZXP安装包")              
+                            aePluginLog("Donwload zxp success")         
+                            showModalUpgradeTip(true,"升级中\n删除旧的ZXP安装包")     
+                            aePluginLog("delete old zxp dir:" + CURRENT_PROJECT_PATH + ",isExits:"+ fs.existsSync(CURRENT_PROJECT_PATH))                  
                             deleteFloder(CURRENT_PROJECT_PATH, true, false, function () { 
+                                aePluginLog("delete old zxp success")
                                 ffmpegFile_zip = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.zip');
                                 showModalUpgradeTip(true,"升级中\n解压缩zxp包") 
                                 if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
@@ -92,12 +115,20 @@
                                     ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.exe');                                
                                     ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
                                 } 
+                                aePluginLog("ffmpegFile:" + ffmpegFile)
+                                aePluginLog("ffmpegDonwloadFile:" + ffmpegDonwloadFile)
+                                aePluginLog("ffmpegInExtensionFile:" + ffmpegInExtensionFile)
+                                aePluginLog("ffmpegFile_zip:" + ffmpegFile_zip)
+
                                 var zxpZipTool = new AdmZip(zxpFile)
+                                    aePluginLog("解压缩zxpFile:" + zxpFile)
                                     zxpZipTool.extractAllTo(/*target path*/CURRENT_PROJECT_PATH , /*overwrite*/ true); 
+                                    aePluginLog("完成解压缩zxpFile:" + zxpFile)
                                     var hasFmpg = fs.existsSync(ffmpegFile) 
+                                    aePluginLog("hasFmpg文件是否存在:" + hasFmpg)
                                     if (hasFmpg) {
                                         showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...拷贝中")
-                                            fs.chmodSync(ffmpegFile,0o777)
+                                        fs.chmodSync(ffmpegFile,0o777)
                                         //拷贝过来
                                         try{
                                                 fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
@@ -107,25 +138,37 @@
                                         } catch (e) {
                                                 alertMessage(e)
                                         }
-                                        } else {
+                                    } else {
                                             showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...下载中")
+                                            aePluginLog("不存在ffmpeg，需要下载")
                                             downloadFile(ffmpegDonwloadFile,ffmpegFile_zip, function () {
-                                                var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
-                                                ffmpegZipTool.extractAllTo(/*target path*/csInterface.getSystemPath(SystemPath.MY_DOCUMENTS) , /*overwrite*/ true); 
-                                                fs.chmodSync(ffmpegFile,0o777)     
-                                                try{
-                                                fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
-                                                fs.unlinkSync(zxpFile);
-                                                alertMessage("更新完成，即将重启。")
-                                                csInterface.closeExtension()
-                                        } catch (e) {
-                                                alertMessage(e)
-                                        }
+                                                aePluginLog("开始解压缩ffmepg.zip："  + ffmpegFile_zip)
+                                                if (fs.existsSync(ffmpegFile_zip)) {
+                                                    var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
+                                                    ffmpegZipTool.extractAllTo(/*target path*/csInterface.getSystemPath(SystemPath.MY_DOCUMENTS) , /*overwrite*/ true); 
+                                                    aePluginLog("解压缩ffmepg.zip：成功"  + ffmpegFile_zip + ",ffmpegFile:" + ffmpegFile + "isExits:" + fs.existsSync(ffmpegFile))
+                                                    fs.chmodSync(ffmpegFile,0o777)  
+                                                    aePluginLog("修ffmpegFile权限成功成功"  + ffmpegFile)   
+                                                    try{    
+                                                        aePluginLog("拷贝ffmpegFile到插件"  + ffmpegInExtensionFile)   
+                                                        fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                                        aePluginLog("拷贝ffmpegFile到插件成功")   
+                                                        fs.unlinkSync(zxpFile);
+                                                        alertMessage("更新完成，即将重启。")
+                                                        csInterface.closeExtension()
+                                                    } catch (e) {
+                                                        alertMessage(e)
+                                                     }
+                                                } else {
+                                                    aePluginLog("解压缩ffmepg.zip失败，文件不存在："  + ffmpegFile_zip)
+                                                }
+                                                
                                             }) 
                                         } 
                             });
                         });
                     }, function () {
+                        aePluginLog("手动取消升级 cancel upgrade") 
                         showModalUpgradeTip(false,"检测升级中")
                     });
                 }
