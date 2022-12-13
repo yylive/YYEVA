@@ -546,6 +546,8 @@ function _beginConveterInternal() {
                 writeStringToTmpFile(data.data, data.filename);
             } else if (data.type === 'writeJsonToMp4MetaData') {
                 writeJsonToMp4MetaData(data.path, data.file, data.data)
+            } else if (data.type === 'alertMessage') {
+                alertMessage(data.data)
             }
         })
         // csInterface.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')", function (res) {
