@@ -11,6 +11,10 @@ var curExtensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
 var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
 var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
 var aePluginLogFile =  nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'aepluginLog.txt');
+var versionFileUrl = 'https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/versionFile'
+var versionDownloadFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), '.versionFile');
+var zxpUrl = "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/2.1.1/YYYSMP4Conveter.zxp";
+var zxpFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'updateAE.zxp');
 var fs = require('fs')
 var spawn = require('child_process'); 
 var AdmZip = require("adm-zip");
@@ -55,6 +59,37 @@ var currentChanegFile = "logs ";
 
 var progress = 0;
 
+
+function downloadFileWithLog(url, filename, progressCallback,failcallback,callback) { 
+    // var stream = fs.createWriteStream(filename);  
+    // request(uri).pipe(stream).on('close', callback);
+
+    https.get(url, (res) => {
+        // Open file in local filesystem
+        const len = res.headers["content-length"]
+        let cur = 0
+        const total = (len / 1048576).toFixed(2) // 转为M 1048576 - bytes in  1Megabyte
+        const file = fs.createWriteStream(filename);
+        // Write data into local file
+        
+        res.on('data', function (chunk) {
+            cur += chunk.length
+            const progress = (100.0 * cur / len).toFixed(2) // 当前进度
+            const currProgress = (cur / 1048576).toFixed(2) // 当前了多少
+            progressCallback(Math.floor(progress))
+          })
+        res.pipe(file);
+        // Close the file
+        file.on('finish', () => {
+            file.close(); 
+            aePluginLog("Donwload url:" + url + ",fileName:" + filename + "Success")         
+            callback()
+        });
+    }).on("error", (err) => { 
+        aePluginLog("Error : Donwload url:" + url + ",fileName:" + filename + " Failure:" + err.message)         
+        failcallback(err.message)
+    });
+}
 
 
 function downloadFile(url, filename, callback) { 
@@ -105,10 +140,7 @@ function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
             if (!isFirstFolder || delFirstFolder) {
                 fs.rmdirSync(path);
             }
-        }
-        if (isFirstFolder) {
-            callback();
-        }
+        } 
     } catch (e) {
         if (isFirstFolder) {
            aePluginLog("path:" + path + "写入失败,error:" + e) 
@@ -440,6 +472,15 @@ function deleteFile(path) {
     }
 }
 
+function aeVersion(){
+    var version = getPluginVersion()
+    alertMessage("当前插件的版本为:" + version)
+}
+
+function aeInstallPath(){ 
+    var path = csInterface.getSystemPath(SystemPath.APPLICATION);
+    alertMessage("当前插件的安装路径为:" + path)
+}
 
 function beginConverter(){
     if (outputPath == null || outputPath == undefined || outputPath == '') {

@@ -32,25 +32,30 @@
 
      <script type="text/javascript">
 
+        
+
  
         function checkUpradeIfNeed(){ 
             
             if (fs.existsSync(aePluginLogFile)) {
                 fs.unlinkSync(aePluginLogFile)
                 aePluginLog("插件日志：" + aePluginLogFile + "删除成功")
-            } 
-            var infoUrl = 'https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/versionFile';
-            var infoName = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), '.versionFile');
-            aePluginLog("开始下载VersionFile文件：" + infoUrl)
+            }   
+            aePluginLog("开始下载VersionFile文件：" + versionFileUrl)
             //check 版本
-            downloadFile(infoUrl, infoName, function () {   
-                showModalUpgradeTip(true,"检测升级中") 
+            downloadFileWithLog(versionFileUrl, versionDownloadFile, function(progress){
+                showModalUpgradeTip("下载VersionFile文件中," + progress + "%" )
+            },function (error) {   
+                aePluginLog("下载VersionFile文件失败，升级失败")
+                return
+            },function () {   
+                showModalUpgradeTip(true,"检测升级中...") 
                 var newestVersion = 0
                 var currentVersion = 0
-                if (fs.existsSync(infoName)) {
-                    newestVersion = parseInt(fs.readFileSync(infoName, 'utf-8'));
+                if (fs.existsSync(versionDownloadFile)) {
+                    newestVersion = parseInt(fs.readFileSync(versionDownloadFile, 'utf-8'));
                 } 
-                aePluginLog("versionFile文件下载完成：" + infoName + ",newestVersion:" + newestVersion )
+                aePluginLog("versionFile文件下载完成：" + versionDownloadFile + ",newestVersion:" + newestVersion )
                 var CURRENT_PROJECT_PATH = csInterface.getSystemPath(SystemPath.APPLICATION);
                 var saveVersFile = nodePath.join(CURRENT_PROJECT_PATH, 'versionFile')
                 
@@ -58,15 +63,15 @@
                     currentVersion = parseInt(fs.readFileSync(saveVersFile, 'utf-8'));
                 }  
                 aePluginLog("version对比 newestVersion:" + newestVersion + "----currentVersion:" + currentVersion ) 
-                if (fs.existsSync(infoName)) {
-                    fs.unlinkSync(infoName)
+                if (fs.existsSync(versionDownloadFile)) {
+                    fs.unlinkSync(versionDownloadFile)
                 } 
                 var fmpagBefore =  nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
                 //判断是否包含ffmpeg文件
                 if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
                     fmpagBefore = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
                 }  
-                
+                aePluginLog("fmpagBefore文件地址:" + fmpagBefore ) 
                 var hasNewVersion =  currentVersion < newestVersion
                 
                 if (!fs.existsSync(fmpagBefore)) {
@@ -75,30 +80,26 @@
                 } 
 
                 if (!hasNewVersion) {
-                    aePluginLog("已经是最新版本，无需升级" ) 
                     showModalUpgradeTip(false,"检测升级中")
                     return
                 }
 
-                aePluginLog("fmpagBefore文件地址:" + fmpagBefore ) 
-
                 aePluginLog("hasNewVersion：" + hasNewVersion )  
                 
                 if (hasNewVersion) {  
-                    confirmMessages("Hi，YYEVA插件有更新的版本了哦，更新一下? \\n tip: 下载过慢可以到官网下载最新版本安装哦。", function () {
-                        // var selectPathBtn = document.getElementById("selectPathBtn");
-                        // selectPathBtn.disabled = true;
-                        // var selectFile = document.getElementById("selectFile");
-                        // selectFile.disabled = true; 
-                        var zxpUrl = "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/2.1.1/YYYSMP4Conveter.zxp";
-                        var zxpFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'updateAE.zxp');
+                    confirmMessages("Hi，YYEVA插件有更新的版本了哦，更新一下? \\n tip: 下载过慢可以到官网下载最新版本安装哦。", function () { 
                         var ffmpegFile  
                         var ffmpegDonwloadFile
                         var ffmpegInExtensionFile 
                         showModalUpgradeTip(true,"升级中...\n下载ZXP安装包")      
                         aePluginLog("begin Donwload zxpUrl:" + zxpUrl)         
                         aePluginLog("下载的地址:zxpFile:" + zxpFile)         
-                        downloadFile(zxpUrl, zxpFile, function () { 
+                        downloadFileWithLog(zxpUrl, zxpFile,function(progress) {
+                            showModalUpgradeTip(true,"下载ZXP安装包中," + progress + "%")      
+                        },function(err) {
+                            aePluginLog("下载zxpFile文件失败，升级失败")
+                            return
+                        } , function () { 
                             aePluginLog("Donwload zxp success")         
                             showModalUpgradeTip(true,"升级中\n删除旧的ZXP安装包")     
                             aePluginLog("delete old zxp dir:" + CURRENT_PROJECT_PATH + ",isExits:"+ fs.existsSync(CURRENT_PROJECT_PATH))                  
@@ -141,7 +142,12 @@
                                     } else {
                                             showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...下载中")
                                             aePluginLog("不存在ffmpeg，需要下载")
-                                            downloadFile(ffmpegDonwloadFile,ffmpegFile_zip, function () {
+                                            downloadFileWithLog(ffmpegDonwloadFile,ffmpegFile_zip,function(progress) {
+                                                showModalUpgradeTip(true,"下载ffmpeg安装包中," + progress + "%")      
+                                            },function(err) {
+                                                aePluginLog("下载ffmpeg文件失败，升级失败")
+                                                return
+                                            } ,  function () {
                                                 aePluginLog("开始解压缩ffmepg.zip："  + ffmpegFile_zip)
                                                 if (fs.existsSync(ffmpegFile_zip)) {
                                                     var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
