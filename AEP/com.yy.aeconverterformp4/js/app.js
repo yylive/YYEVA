@@ -1,18 +1,20 @@
- 
+
 /**
  * index.html对应的JS文件
  * Author:Guoyabin YY Inc
- */ 
-
+ */
+var {
+    Worker, isMainThread, parentPort, workerData
+} = require('worker_threads');
 var csInterface = new CSInterface();
 var nodePath = require("path");
 
 var curExtensionPath = csInterface.getSystemPath(SystemPath.EXTENSION);
 var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
 var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
-var aePluginLogFile =  nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'aepluginLog.txt');
+var aePluginLogFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'aepluginLog.txt');
 var fs = require('fs')
-var spawn = require('child_process'); 
+var spawn = require('child_process');
 var AdmZip = require("adm-zip");
 https = require('https');
 
@@ -25,10 +27,10 @@ var outputLogPath;
 var outputTempPath;
 var OS_VERSION_WINDOWS = 1;
 var OS_VERSION_MAC = 2;
-var YYEVA_WRITE_STYLE_METADATA = 1; 
+var YYEVA_WRITE_STYLE_METADATA = 1;
 var YYEVA_CUR_WRITE_STYLE = YYEVA_WRITE_STYLE_METADATA;
 var CEP_Plugin_Version;
-var customer_crf = 23; 
+var customer_crf = 23;
 
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
 
@@ -36,7 +38,7 @@ var MP4EnCodeLevel = {
     low: 0,
     mid: 1,
     high: 2,
-    customer:3,
+    customer: 3,
 };
 var MP4EnCodeType = {
     avc: 0,
@@ -44,8 +46,8 @@ var MP4EnCodeType = {
 };
 
 var MP4ConverMode = {
-    normal:0,
-    dynamic:1
+    normal: 0,
+    dynamic: 1
 }
 
 var encodeLevel = MP4EnCodeLevel.mid;
@@ -57,7 +59,7 @@ var progress = 0;
 
 
 
-function downloadFile(url, filename, callback) { 
+function downloadFile(url, filename, callback) {
     // var stream = fs.createWriteStream(filename);  
     // request(uri).pipe(stream).on('close', callback);
 
@@ -91,7 +93,7 @@ function confirmMessages(message, callbackTrue, callbackFalse) {
 }
 
 
-          
+
 function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
     try {
         if (fs.existsSync(path)) {
@@ -99,9 +101,10 @@ function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
                 var curPath = nodePath.join(path, file);
                 if (fs.statSync(curPath).isDirectory()) { // recurse
                     deleteFloder(curPath, false, true);
-            } else { // delete file
-                fs.unlinkSync(curPath);
-            } });
+                } else { // delete file
+                    fs.unlinkSync(curPath);
+                }
+            });
             if (!isFirstFolder || delFirstFolder) {
                 fs.rmdirSync(path);
             }
@@ -111,17 +114,17 @@ function deleteFloder(path, isFirstFolder, delFirstFolder, callback) {
         }
     } catch (e) {
         if (isFirstFolder) {
-           aePluginLog("path:" + path + "写入失败,error:" + e) 
+            aePluginLog("path:" + path + "写入失败,error:" + e)
         }
     } finally {
         if (isFirstFolder) {
             callback();
         }
     }
-    
+
 }
 
-function aeLogMessageEvent(myEvent){ 
+function aeLogMessageEvent(myEvent) {
     var logStr = myEvent.data;
     if (logStr == undefined) {
         return
@@ -149,7 +152,7 @@ function getPluginVersion() {
         }
     }
 
-    if (version!=undefined){
+    if (version != undefined) {
         CEP_Plugin_Version = version;
     } else {
         CEP_Plugin_Version = "Unknown";
@@ -162,9 +165,9 @@ function getPluginVersion() {
 
 
 window.onload = function () {
-    csInterface.addEventListener("LogMessageEvent",aeLogMessageEvent)
+    csInterface.addEventListener("LogMessageEvent", aeLogMessageEvent)
     //需要补充 active project change事件
-    var version =  (getPluginVersion())
+    var version = (getPluginVersion())
 
     document.getElementById("ae_ver_text").innerText = "插件版本:" + version;
 
@@ -212,8 +215,8 @@ function selectLogPath() {
         LOG_PATH = changePathToPlatform(LOG_PATH)
 
 
-        var os=require('os');
-        var homedir=os.homedir();
+        var os = require('os');
+        var homedir = os.homedir();
         var desktopDir = nodePath.join(homedir, 'desktop');
         var result = window.cep.fs.showSaveDialogEx("一键导出日志", desktopDir, ["zip"], "插件运行日志" + '.zip', '');
         if (result.data) {
@@ -254,23 +257,23 @@ function startOutputLog() {
 
     var writeCount = 0;
 
-    zip.addLocalFolderAsync(LOG_PATH,function (success,error) {
-        writeCount ++;
+    zip.addLocalFolderAsync(LOG_PATH, function (success, error) {
+        writeCount++;
         if (writeCount == 2) {
-            writeZipPromise(zip,outputLogPath)
+            writeZipPromise(zip, outputLogPath)
         }
-    },"ae_log")
+    }, "ae_log")
 
-    zip.addLocalFolderAsync(TEMP_SOURCE_PATH,function (success,error) {
-        writeCount ++;
+    zip.addLocalFolderAsync(TEMP_SOURCE_PATH, function (success, error) {
+        writeCount++;
         if (writeCount == 2) {
-            writeZipPromise(zip,outputLogPath)
+            writeZipPromise(zip, outputLogPath)
         }
-    },"temp_log")
+    }, "temp_log")
 }
 
-function writeZipPromise(zip,path) {
-    zip.writeZip(/*target file name*/ path,function () {
+function writeZipPromise(zip, path) {
+    zip.writeZip(/*target file name*/ path, function () {
         alertMessage("导出成功")
         //打开目录
         showModalLogTip(false)
@@ -305,12 +308,12 @@ function cleanProject() {
     document.getElementById("pathtext").innerHTML = "未设置"
     selectLevel(1);
 }
- 
+
 function needShowAllCustomerInput(needShow) {
 
     var customerEs = document.getElementsByClassName('customerCRFInput')
 
-    for (var i = 0;i<customerEs.length;i++) {
+    for (var i = 0; i < customerEs.length; i++) {
         var customerLevelInput = customerEs[i]
         customerLevelInput.style.visibility = needShow ? "visible" : "hidden"
         customerLevelInput.value = "23"
@@ -332,39 +335,39 @@ function selectLevel(level) {
     needShowAllCustomerInput(false)
 
 
-    encodeLevel= level;
+    encodeLevel = level;
 
     var selectEs = lowEs;
-    var otherEs = [midEs,highEs,customerEs];
+    var otherEs = [midEs, highEs, customerEs];
 
     if (level == MP4EnCodeLevel.mid) {
         selectEs = midEs;
-        otherEs = [lowEs,highEs,customerEs];
+        otherEs = [lowEs, highEs, customerEs];
     } else if (level == MP4EnCodeLevel.high) {
         selectEs = highEs;
-        otherEs = [midEs,lowEs,customerEs];
+        otherEs = [midEs, lowEs, customerEs];
     } else if (level == MP4EnCodeLevel.customer) {
         selectEs = customerEs;
-        otherEs = [midEs,lowEs,highEs];
+        otherEs = [midEs, lowEs, highEs];
         needShowAllCustomerInput(true)
     }
 
-    needActiveAllSelectLevel(selectEs,true)
+    needActiveAllSelectLevel(selectEs, true)
 
-    for (var i = 0;i<otherEs.length;i++) {
+    for (var i = 0; i < otherEs.length; i++) {
         var levels = otherEs[i]
-        needActiveAllSelectLevel(levels,false);
+        needActiveAllSelectLevel(levels, false);
     }
 
 
 }
 
-function needActiveAllSelectLevel(levels,isActive) {
+function needActiveAllSelectLevel(levels, isActive) {
 
     var backgroundColor = isActive ? "#1473E6" : "#232323";
-    var color = isActive ? "white" : "#8A8A8A" ;
+    var color = isActive ? "white" : "#8A8A8A";
 
-    for (var i = 0;i<levels.length;i++) {
+    for (var i = 0; i < levels.length; i++) {
         var level = levels[i]
         level.style.backgroundColor = backgroundColor;
         level.style.color = color;
@@ -441,7 +444,7 @@ function deleteFile(path) {
 }
 
 
-function beginConverter(){
+function beginConverter() {
     if (outputPath == null || outputPath == undefined || outputPath == '') {
         alertMessage("请先选择输出路径");
         return;
@@ -457,9 +460,9 @@ function beginConverter(){
         _beginConveterInternal();
     })
 }
-  
 
-function replaceSuffix(originUrl,extentionPath) {
+
+function replaceSuffix(originUrl, extentionPath) {
     var lastDocIndex = originUrl.lastIndexOf('.')
     var outputPath_264 = originUrl.slice(0, lastDocIndex);
     var outputPath_265 = originUrl.slice(0, lastDocIndex);
@@ -473,7 +476,7 @@ function replaceSuffix(originUrl,extentionPath) {
     outputPath_265 = outputPath_265 + '_265'
 
 
-    if (encodeLevel== MP4EnCodeLevel.low) {
+    if (encodeLevel == MP4EnCodeLevel.low) {
         outputPath_264 = outputPath_264 + '_low.'
         outputPath_265 = outputPath_265 + '_low.'
     } else if (encodeLevel == MP4EnCodeLevel.mid) {
@@ -482,7 +485,7 @@ function replaceSuffix(originUrl,extentionPath) {
     } else if (encodeLevel == MP4EnCodeLevel.high) {
         outputPath_264 = outputPath_264 + '_high.'
         outputPath_265 = outputPath_265 + '_high.'
-    }  else if (encodeLevel == MP4EnCodeLevel.customer) {
+    } else if (encodeLevel == MP4EnCodeLevel.customer) {
         outputPath_264 = outputPath_264 + '_crf' + customer_crf + '.'
         outputPath_265 = outputPath_265 + '_crf' + customer_crf + '.'
     }
@@ -502,8 +505,8 @@ function showModalTip(needShow) {
     document.getElementById('modal-overlay').style.visibility = showStr;
 }
 
-function showModalUpgradeTip(needShow,text) { 
-    var showStr = needShow ? "visible" : "hidden"; 
+function showModalUpgradeTip(needShow, text) {
+    var showStr = needShow ? "visible" : "hidden";
     document.getElementById('modal-upgrade-overlay').style.visibility = showStr;
     document.getElementById('transform-upgrade-tips').innerText = text;
 }
@@ -513,122 +516,141 @@ function showModalLogTip(needShow) {
     document.getElementById('modal-log-overlay').style.visibility = showStr;
 }
 
-function _beginConveterInternal(){
-    
+function _beginConveterInternal() {
+
     showModalTip(true);
-    
+
     progress = 0;
     updateProcess(progress)
     logFile('开始插件转换: level:' + encodeLevel + ",crf:" + customer_crf);
-    
+
     createTempFolder(function () {
-        progress = 0.1; 
-        updateProcess(progress) 
+        progress = 0.1;
+        updateProcess(progress)
         progress = 0.3
-        updateProcess(progress,"临时目录准备完成") 
-        csInterface.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')", function (res) {
+        updateProcess(progress, "临时目录准备完成")
+        var osVersion = getOSVersion();
+        const worker = new Worker('./worker.js', {
+            progress,
+            TEMP_SOURCE_PATH,
+            osVersion
+        })
 
-            if (res == undefined) {
-                return
-            }  
- 
-            res = JSON.parse(res)
-            var mode = res["mode"]  
-            var data = res["data"]
-
-            var pathObj = mode == 1 ? replaceSuffix(outputPath,"normal") : replaceSuffix(outputPath,"dynamic") 
-            var outFile_264 = pathObj.path_264;
-            var outFile_265 = pathObj.path_265;
-
-            var tempPathObj = replaceSuffix(outputTempPath)
-            var outputTempPath_264 = tempPathObj.path_264;
-            var outputTempPath_265 = tempPathObj.path_265;
-
-            var successMsg = "mp4转换成功"
-
-            logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
-            
-            var jsonStr = data
-            progress = 0.5
-            updateProcess(progress,"AE工程解析完成")
-            if (jsonStr == 'undefined' || jsonStr == "") {
-                logFile('json is undefined');
-                showModalTip(false)
-                return
+        worker.on('message', data => {
+            console.log(`worker on message`, data)
+            if (data.progress > 0) {
+                updateProcess(data.progress, data.message)
+            } else if (data.type === 'showModalTip') {
+                showModalTip(data.data)
+            } else if (data.type === 'writeStringToTmpFile') {
+                writeStringToTmpFile(data.data, data.filename);
+            } else if (data.type === 'writeJsonToMp4MetaData') {
+                writeJsonToMp4MetaData(data.path, data.file, data.data)
             }
-            var result = JSON.parse(jsonStr)
-            var movFile = result["file"]
-            var evaJson = result["evaJson"]
-            movFile = changePathToPlatform(movFile)
-            writeStringToTmpFile(evaJson, 'myOutput.txt');
+        })
+        // csInterface.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')", function (res) {
 
-            deleteFile(outputTempPath_264)
-            deleteFile(outputTempPath_265)
+        //     if (res == undefined) {
+        //         return
+        //     }
 
-            deleteFile(outFile_264)
-            deleteFile(outFile_265)
+        //     res = JSON.parse(res)
+        //     var mode = res["mode"]
+        //     var data = res["data"]
 
-            evaJson = zlibJson(evaJson)
+        //     var pathObj = mode == 1 ? replaceSuffix(outputPath, "normal") : replaceSuffix(outputPath, "dynamic")
+        //     var outFile_264 = pathObj.path_264;
+        //     var outFile_265 = pathObj.path_265;
 
-            let success264 = false;
-            let success265 = false;
+        //     var tempPathObj = replaceSuffix(outputTempPath)
+        //     var outputTempPath_264 = tempPathObj.path_264;
+        //     var outputTempPath_265 = tempPathObj.path_265;
 
-            progress = 0.7;
-            updateProcess(progress,"Json数据压缩完成");
+        //     var successMsg = "mp4转换成功"
 
-            if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
-                logFile('当前写入的类型是METADATA');
-            } 
+        //     logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
 
-            convertAviToMP4(movFile, outputTempPath_264, encodeLevel, MP4EnCodeType.avc, function () {
-                if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
-                    // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson);
-                }  
+        //     var jsonStr = data
+        //     progress = 0.5
+        //     updateProcess(progress, "AE工程解析完成")
+        //     if (jsonStr == 'undefined' || jsonStr == "") {
+        //         logFile('json is undefined');
+        //         showModalTip(false)
+        //         return
+        //     }
+        //     var result = JSON.parse(jsonStr)
+        //     var movFile = result["file"]
+        //     var evaJson = result["evaJson"]
+        //     movFile = changePathToPlatform(movFile)
+        //     writeStringToTmpFile(evaJson, 'myOutput.txt');
 
-                success264 = true
-                logFile('完成转换264' + "success265 :" + success265 + "success264" + success264);
+        //     deleteFile(outputTempPath_264)
+        //     deleteFile(outputTempPath_265)
 
-                progress += 0.1;
-                updateProcess(progress,"h264的metadata数据已写入");
+        //     deleteFile(outFile_264)
+        //     deleteFile(outFile_265)
 
-                if (success264 && success265) {
-                    progress = 1;
-                    updateProcess(progress);
-                    setTimeout(() => {
-                        showModalTip(false)
-                        alertMessage(successMsg)
-                    }, 250);
-                    logFile('全部完成转换');
-                }
-            });
+        //     evaJson = zlibJson(evaJson)
 
-            convertAviToMP4(movFile, outputTempPath_265, encodeLevel, MP4EnCodeType.hevc, function () {
-                if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
-                    // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson);
-                }  
-                success265 = true
-                logFile('完成转换265' + "success265 :" + success265 + "success264" + success264);
+        //     let success264 = false;
+        //     let success265 = false;
 
-                progress += 0.1;
+        //     progress = 0.7;
+        //     updateProcess(progress, "Json数据压缩完成");
 
-                updateProcess(progress,"h265的metadata数据已写入");
+        //     if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
+        //         logFile('当前写入的类型是METADATA');
+        //     }
 
-                if (success264 && success265) {
-                    progress = 1;
-                    updateProcess(progress);
-                    setTimeout(() => {
-                        showModalTip(false)
-                        alertMessage(successMsg)
-                    }, 250);
-                    logFile('全部完成转换');
-                }
-            });
+        //     convertAviToMP4(movFile, outputTempPath_264, encodeLevel, MP4EnCodeType.avc, function () {
+        //         if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
+        //             // alertMessage("当前写入的类型是METADATA")
+        //             writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson);
+        //         }
 
-            
+        //         success264 = true
+        //         logFile('完成转换264' + "success265 :" + success265 + "success264" + success264);
 
-        });
+        //         progress += 0.1;
+        //         updateProcess(progress, "h264的metadata数据已写入");
+
+        //         if (success264 && success265) {
+        //             progress = 1;
+        //             updateProcess(progress);
+        //             setTimeout(() => {
+        //                 showModalTip(false)
+        //                 alertMessage(successMsg)
+        //             }, 250);
+        //             logFile('全部完成转换');
+        //         }
+        //     });
+
+        //     convertAviToMP4(movFile, outputTempPath_265, encodeLevel, MP4EnCodeType.hevc, function () {
+        //         if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
+        //             // alertMessage("当前写入的类型是METADATA")
+        //             writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson);
+        //         }
+        //         success265 = true
+        //         logFile('完成转换265' + "success265 :" + success265 + "success264" + success264);
+
+        //         progress += 0.1;
+
+        //         updateProcess(progress, "h265的metadata数据已写入");
+
+        //         if (success264 && success265) {
+        //             progress = 1;
+        //             updateProcess(progress);
+        //             setTimeout(() => {
+        //                 showModalTip(false)
+        //                 alertMessage(successMsg)
+        //             }, 250);
+        //             logFile('全部完成转换');
+        //         }
+        //     });
+
+
+
+        // });
     });
 }
 
@@ -641,12 +663,12 @@ function _startConvert() {
     updateProcess(progress)
 
     logFile('开始动态元素转换: level:' + encodeLevel + ",crf:" + customer_crf);
-  
+
     createTempFolder(function () {
-        progress = 0.1; 
+        progress = 0.1;
         updateProcess(progress)
-  
-        var pathObj = replaceSuffix(outputPath,"dynamic")
+
+        var pathObj = replaceSuffix(outputPath, "dynamic")
         var outFile_264 = pathObj.path_264;
         var outFile_265 = pathObj.path_265;
 
@@ -659,10 +681,10 @@ function _startConvert() {
         logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
 
         progress = 0.3
-        updateProcess(progress,"临时目录准备完成")
+        updateProcess(progress, "临时目录准备完成")
 
         csInterface.evalScript("startConverter('" + TEMP_SOURCE_PATH + "')", function (json) {
-           
+
 
         });
     });
@@ -672,30 +694,30 @@ function _startConvert_normal() {
 
     showModalTip(true);
     progress = 0;
-    updateProcess(progress) 
+    updateProcess(progress)
     logFile('开始h264/h265转换: level:' + encodeLevel + ",crf:" + customer_crf);
 
     createTempFolder(function (result) {
         //日志必须从这里开始  
         logFile('创建临时文件成功')
-        var pathObj = replaceSuffix(outputPath ,"normal")
+        var pathObj = replaceSuffix(outputPath, "normal")
         var outFile_264 = pathObj.path_264;
-        var outFile_265 = pathObj.path_265; 
-        var successMsg = "mp4转换成功" 
-        logFile('264输出路径' + outFile_264 + '，265输出路径' + outFile_265); 
+        var outFile_265 = pathObj.path_265;
+        var successMsg = "mp4转换成功"
+        logFile('264输出路径' + outFile_264 + '，265输出路径' + outFile_265);
         progress = 0.3;
-        updateProcess(progress,"临时文件准备成功"); 
+        updateProcess(progress, "临时文件准备成功");
         csInterface.evalScript("startConverter_Normal('" + TEMP_SOURCE_PATH + "')", function (movFile) {
 
-            if (movFile == "undefined" || movFile == "" ||  movFile == null) {
+            if (movFile == "undefined" || movFile == "" || movFile == null) {
                 completeConvert_for_normal(false)
                 return;
             }
-  
+
             progress = 0.5;
-            updateProcess(progress,"AE完成队列渲染")
+            updateProcess(progress, "AE完成队列渲染")
             logFile('渲染的视频路径：' + movFile)
- 
+
 
             movFile = changePathToPlatform(movFile)
             logFile('根据平台适配的视频路径：' + movFile);
@@ -748,15 +770,14 @@ function _startConvert_normal() {
     });
 }
 
-function completeConvert_for_normal(success,message = "")
-{
+function completeConvert_for_normal(success, message = "") {
     progress = 1;
     updateProcess(progress);
     showModalTip(false)
     logFile(success == true ? "转换成功" : "转换失败")
-    if (message!=undefined && message != "") { 
+    if (message != undefined && message != "") {
         alertMessage(message)
-    }  
+    }
 }
 
 function checkCRFValide() {
@@ -817,7 +838,7 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, callback) {
     });
 }
 
- 
+
 
 function writeJsonToMp4MetaData(mp4TempFile, mp4File, json) {
     if (json.length == 0) {
@@ -827,8 +848,8 @@ function writeJsonToMp4MetaData(mp4TempFile, mp4File, json) {
     // yyeffectmp4json[[base64]]
     var templateStart = "yyeffectmp4json[["
     var templateEnd = "]]yyeffectmp4json"
-    json =  templateStart + json + templateEnd
-    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags " + addPathUpDot(mp4File);
+    json = templateStart + json + templateEnd
+    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" + json + " -movflags +use_metadata_tags " + addPathUpDot(mp4File);
     writeStringToTmpFile(writeJsonCmd, 'writeJsonToMp4MetaData.txt')
     logFile("写入Json到MetaData" + ",mp4TempFile:" + mp4TempFile + ",mp4File:" + mp4File)
     var process = require('child_process');
@@ -870,7 +891,7 @@ function writeStringToTmpFile(string, file) //'\\myOutput.txt'
 
 function getBaseLog(isJs) {
     var tag = isJs ? "js" : "jsx"
-    var base = '[' + tag +  ']' + '[' + CEP_Plugin_Version + ']' + ">>>";
+    var base = '[' + tag + ']' + '[' + CEP_Plugin_Version + ']' + ">>>";
     return base
 }
 
@@ -878,19 +899,19 @@ function logFile(logText) {
     var outputFile = LOG_PATH + pathSeprator() + currentChanegFile
 
     //格式
-    fs.appendFileSync(outputFile, getBaseLog(true)  + logText + '\n' + '\n')
+    fs.appendFileSync(outputFile, getBaseLog(true) + logText + '\n' + '\n')
 }
 
 function aePluginLog(logText) {
     //格式
-    fs.appendFileSync(aePluginLogFile, '[aelog]>>>'  + logText + '\n')
+    fs.appendFileSync(aePluginLogFile, '[aelog]>>>' + logText + '\n')
 }
 
 
 
 function logJSXFile(logText) {
     var outputFile = LOG_PATH + pathSeprator() + currentChanegFile
-    fs.appendFileSync(outputFile, getBaseLog(false)   + logText + '\n'  + '\n')
+    fs.appendFileSync(outputFile, getBaseLog(false) + logText + '\n' + '\n')
 }
 
 
@@ -903,33 +924,11 @@ function pathSeprator() {
     }
 }
 
-function updateProcess(progress,message="转换中...") {
+function updateProcess(progress, message = "转换中...") {
     document.getElementById('transform-tips').innerText = message + ' ' + progress * 100 + "%";
 }
 
 
-function zlibJson(json) {
 
-    if (json == undefined) {
-        return
-    }
-    var zlib = require('zlib');
-    var Buffer = require('buffer').Buffer
 
-// Calling deflateSync method
-    var deflated = zlib.deflateSync(json).toString('base64');
-    writeStringToTmpFile(deflated,"myOutput_deflated.txt")
-
-    logFile("转码前的长度：" + json.length)
-
-// Calling inflateSync method
-    var inflated = zlib.inflateSync(Buffer.from(deflated, 'base64'));
-    writeStringToTmpFile(inflated,"myOutput_inflated.txt")
-
-    logFile("转码后的长度：" + deflated.length)
-
-    return deflated;
-
-}
- 
 
