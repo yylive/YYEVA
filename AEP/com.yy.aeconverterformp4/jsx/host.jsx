@@ -10,7 +10,14 @@ var EFFECT_TAG_TYPE_IMAGE = "img"
  * 用来生成支持MP4视频插入动态元素的AE脚本
  * Author:Guoyabin YY Inc
  */
- 
+
+ var txtCompoItem
+ var imgCompoItem
+ var mp4Conveter
+ var copyOutcompoItem
+ var outPath
+ var needCleanCom = false
+ var beginConverterJson = undefined
  var confirmMessage = function (message) {
     return confirm(message);
 }
@@ -127,12 +134,18 @@ var AECompoItemUtils = (function() {
     } 
 
     AECompoItemUtils.prototype.findUsedInCompo = function(compoItem,chainStr,activeItem) { 
+         self.findUsedInCompoWithLog(compoItem,chainStr,activeItem,false)
+    }
+
+    AECompoItemUtils.prototype.findUsedInCompoWithLog = function(compoItem,chainStr,activeItem ,needLog) { 
         var usedInItems = compoItem.usedIn 
-        logMessage("usedInItems.length:" + usedInItems.length)  
+        if (needLog == true)
+            logMessage("usedInItems.length:" + usedInItems.length)  
         if(usedInItems.length > 0 ) {
           for (var i = 0 ; i < usedInItems.length;i++) {
              var item = usedInItems[i]  
-             logMessage("item.name:" + item.name) 
+             if (needLog == true)
+                logMessage("item.name:" + item.name) 
              if (item != undefined) {
                  if (item == activeItem) {   
                      //checkVisible
@@ -140,9 +153,10 @@ var AECompoItemUtils = (function() {
                         return (activeItem.name  + "->" +  chainStr)    
                      }    
                  } else {
-                    logMessage("item.name:" + item.name + ",length:" + item.usedIn.length) 
+                    if (needLog == true)
+                        logMessage("item.name:" + item.name + ",length:" + item.usedIn.length) 
                      if (item.usedIn.length > 0 )
-                      var subFind = this.findUsedInCompo(item,item.name + "->" + chainStr,activeItem)  
+                      var subFind = this.findUsedInCompoWithLog(item,item.name + "->" + chainStr,activeItem,needLog)  
                       if (subFind != undefined) {
                          return subFind
                       }
@@ -178,7 +192,7 @@ var AECompoItemUtils = (function() {
 
     
 
-    AECompoItemUtils.prototype.maskCompoWithJudgeName = function(judgeName,activeItem) {
+    AECompoItemUtils.prototype.maskCompoWithJudgeName = function(judgeName,activeItem,needLog) {
  
         var collection_item = this.app.project.items;
         var compoItemsCount = collection_item.length; 
@@ -188,13 +202,16 @@ var AECompoItemUtils = (function() {
             if ((compoItem != undefined)) {  
                 if (compoItem.name.match(judgeName)) {
                     //分析引用关系    
-                    logMessage("开始寻找链条：" + judgeName )
-                    var chain = this.findUsedInCompo(compoItem,judgeName,activeItem) 
+                    if (needLog == true )
+                         logMessage("开始寻找链条：" + judgeName ) 
+                    var chain = this.findUsedInCompoWithLog(compoItem,judgeName,activeItem,needLog) 
                     if (chain != undefined) {
-                        logMessage("找到了" + judgeName + ",引用链条为：" + chain)
+                        if (needLog == true )
+                            logMessage("找到了" + judgeName + ",引用链条为：" + chain)
                         return compoItem;
                     } else {
-                        logMessage("没找到了" + judgeName + "的引用链条")
+                        if (needLog == true )
+                            logMessage("没找到了" + judgeName + "的引用链条")
                     }
                 }
             }
@@ -247,7 +264,7 @@ var AECompoItemUtils = (function() {
 
         }
     }
-    AECompoItemUtils.prototype.findCompoUsedIn = function(compItem) {
+    AECompoItemUtils.prototype.findCompoUsedIn = function(compItem,activeItem) {
 
         if (compItem == null || compItem == undefined) {
             return undefined;
@@ -259,7 +276,7 @@ var AECompoItemUtils = (function() {
         if (useInItems.length > 0) {
             for (var i = 0; i < useInItems.length; i++) {
                 var item = useInItems[i];
-                if (item instanceof CompItem) {
+                if (item instanceof CompItem && item == activeItem) {
                     var subLayerCollection = item.layers;
                     for (var j = 1; j <= subLayerCollection.length; j++) {
                         var contentLayer = subLayerCollection[j];
@@ -273,16 +290,20 @@ var AECompoItemUtils = (function() {
         return sourceLayers;
     }
     AECompoItemUtils.prototype.hiddenLayer = function(layers) {
-        for (var i = 0; i <= layers.length; i++) {
+        logMessage("hiddenLayer.length:" + layers.length) 
+        for (var i = 0; i < layers.length; i++) {
             var maskLayer = layers[i];
+            logMessage("hiddenLayer.maskLayer:" +  i + "," + maskLayer.name) 
             if (maskLayer != undefined) {
                 maskLayer.enabled = false;
             }
         }
     }
     AECompoItemUtils.prototype.showLayers = function(layers) {
-        for (var i = 0; i <= layers.length; i++) {
+        logMessage("showLayers.length:" + layers.length) 
+        for (var i = 0; i < layers.length; i++) {
             var maskLayer = layers[i];
+            logMessage("showLayers.maskLayer:" +  i + "," + maskLayer.name) 
             if (maskLayer != undefined) {
                 maskLayer.enabled = true;
             }
@@ -355,25 +376,25 @@ var DynamicMp4Conveter = (function() {
             return newOutComp 
     }
   
-    DynamicMp4Conveter.prototype.beginConveter = function(tempPath) {
-   
+    DynamicMp4Conveter.prototype.beginConveter = function(tempPath) { 
+        
+        logMessage("beginConveter begin")  
+        
         var activeItem = app.project.activeItem
-
+        
         //判断有没有convertMP4模板
          if (activeItem == null || activeItem == undefined) {
             alertMessage("请选择一个合成");
             return nil;
-        }
-
-        var needCleanCom = false
-
+        } 
+        needCleanCom = false 
         var alphaLayer = this.compoItemUtils.findAlphaLayer(activeItem);
         if (alphaLayer == undefined) { 
             logMessage("未找到alphaLayer,尝试添加一个AlphaLayer")
             var newOutComp = this.addSelfAlphaLayer(activeItem) 
             if (newOutComp == undefined) {
                alertMessage("Alpha区域创建或添加失败")
-               logMessage("添加一个AlphaLayer失败")
+               logMessage("未找到AlphaLayer，且添加一个失败")
                return nil     
             } 
             logMessage("添加一个AlphaLayer成功")
@@ -393,8 +414,8 @@ var DynamicMp4Conveter = (function() {
         //获取文字/图像遮罩合成
         logMessage("开始处理,所选合成为：" + activeItem.name)
  
-        var txtCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,activeItem);
-        var imgCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,activeItem);
+        // var txtCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,activeItem,true);
+        // var imgCompoItem = this.compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,activeItem,true);
  
 
         //分析文字/图像遮罩合成
@@ -433,6 +454,7 @@ var DynamicMp4Conveter = (function() {
 
         //复制合成
         var compoItem = activeItem.duplicate()
+        copyOutcompoItem = compoItem
 
         var outCompW = activeItem.width / 2
         var outCompH = activeItem.height
@@ -465,8 +487,9 @@ var DynamicMp4Conveter = (function() {
         //计算最大容纳区域
         //调整输出合成的大小
         //合并图层
-
-        var outputInfo = this.mergeLayer(maskInfoList, sourceInfos,compoItem,aspectAlphaRatio);
+ 
+        var outputInfo = this.mergeLayer(maskInfoList, sourceInfos,compoItem,aspectAlphaRatio)
+ 
 
         logMessage("mergeLayer complete")
 
@@ -543,37 +566,49 @@ var DynamicMp4Conveter = (function() {
             "effect": src,
             "datas": mergeLayerInfos.frame,
         };
-        
+         
+        //直接先返回 让js再调用一下方法 分片处理
+        logMessage("beginConveter emd")  
+        return outputJson 
+    }
 
-        //隐藏mask_layer在父layer上
-        var hiddenLayers = [];
-        var txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem);
-        var imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem);
+    DynamicMp4Conveter.prototype.nextDeal = function(outputJson,tempPath){ 
+        logMessage("nextDeal begin")  
+        var hiddenLayers = [];  
+        var txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,copyOutcompoItem);
+        var imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,copyOutcompoItem);
         if (txtCompoItemUserInLayer != undefined) {
             hiddenLayers = hiddenLayers.concat(txtCompoItemUserInLayer)
-        }
-
+        } 
         if (imgCompoItemUserInLayer != undefined) {
             hiddenLayers = hiddenLayers.concat(imgCompoItemUserInLayer)
         }
 
         this.compoItemUtils.hiddenLayer(hiddenLayers)
-        var aviFile = renderQueue(compoItem, tempPath)
-        compoItem.remove();
-        this.compoItemUtils.showLayers(hiddenLayers)
+        var aviFile = renderQueue(copyOutcompoItem, tempPath)
+
+        if (copyOutcompoItem) {
+            logMessage("copyOutcompoItem remove begin") 
+            copyOutcompoItem.remove();
+            logMessage("copyOutcompoItem remove success") 
+        } else {
+            logMessage("not copyOutcompoItem") 
+        } 
+
         var result = {
             "file": aviFile,
             "evaJson": JSON.stringify(outputJson)
-        };
-
-        if (needCleanCom) {
-            activeItem.remove()
+        }
+        logMessage("needCleanCom:" + needCleanCom)  
+        if (needCleanCom == true && this.activeItem != undefined) {
+            this.activeItem.remove()
         }
         
         //渲染
-        var json = JSON.stringify(result)
-        return json;
-    };
+        var resJson = JSON.stringify(result) 
+        logMessage("nextDeal end")  
+        return resJson;
+    }
 
     DynamicMp4Conveter.prototype.getOSVersion = function() {
         if (system.osName.indexOf("Windows") >= 0) {
@@ -761,10 +796,8 @@ var DynamicMp4Conveter = (function() {
         var activeItem = this.activeItem;
         var duration = this.proj.duration;
         var frameRate = this.proj.frameRate;
-        var step = 1.0 / frameRate;
-
-        var aspectAlphaRatio = alphaAspect
-
+        var step = 1.0 / frameRate; 
+        var aspectAlphaRatio = alphaAspect 
         var maxWidth = 0
         var maxHeight = 0
  
@@ -781,12 +814,19 @@ var DynamicMp4Conveter = (function() {
         //     if (maxHeight < 0) maxHeight = 0
         // } 
         maxWidth = activeItem.width * (1 - aspectAlphaRatio) - margin ;
-
         var beginY = activeItem.height * aspectAlphaRatio + margin;
         var beginX = activeItem.width * 0.5 + margin;
- 
         var stepMaxHeight = 0;
+
+
+         // layer1.setValueAtTimes(times,values)
+         // layer2.setValueAtTimes(times,values)
+         var times = []
+         var allLayerPositions = {} 
+
         for (var cTime = 0.0; cTime < duration; cTime += step) {
+
+            times.push(cTime)
 
             var startX = beginX;
             var startY = beginY;
@@ -805,6 +845,7 @@ var DynamicMp4Conveter = (function() {
             var preCopyLayer = undefined;
             var isNewLine = true; 
             var currentStepMaxHeight = 0;
+ 
             for (var i = 0; i < findMask.length; i++) {
                 var layerInfo = findMask[i];
                 var frames = layerInfo["frame"];
@@ -825,7 +866,8 @@ var DynamicMp4Conveter = (function() {
                     copyLayer = layer.duplicate();
                     allCopyLayer.push(copyLayer)
                     layerInfo["copyLayer"] = copyLayer;
-                    copyLayer.startTime = startTime;
+                    copyLayer.startTime = startTime
+                    allLayerPositions[copyLayer.name] = []
                 }
 
                 if (this.compoItemUtils.isTrackMatteType(layer) && preLayer != undefined && preLayer.hasTrackMatte == true) {
@@ -833,10 +875,10 @@ var DynamicMp4Conveter = (function() {
                     var positionContents = preLayer.property("ADBE Transform Group").property("ADBE Position");
                     var x = positionContents.valueAtTime(cTime, false)[0];
                     var y = positionContents.valueAtTime(cTime, false)[1];
-
-                    var preCopyposition = preCopyLayer.property("ADBE Transform Group").property("ADBE Position");
-                    var newX = preCopyposition.valueAtTime(cTime, false)[0];
-                    var newY = preCopyposition.valueAtTime(cTime, false)[1];
+                    
+                    // var preCopyposition = preCopyLayer.property("ADBE Transform Group").property("ADBE Position");
+                    var newX = allLayerPositions[preCopyLayer.name][frameIndex][0];
+                    var newY = allLayerPositions[preCopyLayer.name][frameIndex][1];
                     var offSetX = newX - x;
                     var offSetY = newY - y;
                     var layerpositionContents = layer.property("ADBE Transform Group").property("ADBE Position");
@@ -844,13 +886,12 @@ var DynamicMp4Conveter = (function() {
                     var layerY = layerpositionContents.valueAtTime(cTime, false)[1];
                     var newLayerX = layerX + offSetX;
                     var newLayerY = layerY + offSetY;
-                    var copyPosition = copyLayer.property("ADBE Transform Group").property("ADBE Position");
-                    copyPosition.setValueAtTime( cTime,[newLayerX, newLayerY, 0]);
+                    allLayerPositions[copyLayer.name].push([newLayerX, newLayerY, 0])
                     continue;
                 }
  
                 // copyLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE
-                var position = copyLayer.property("ADBE Transform Group").property("ADBE Position");
+                // var position = copyLayer.property("ADBE Transform Group").property("ADBE Position");
                 // 取消父级和链接 防止位置错乱
                 copyLayer.parent = null
 
@@ -884,7 +925,8 @@ var DynamicMp4Conveter = (function() {
 
                 //startY = app.project.activeItem.height * 0.5 + margin + layerHeight;
                 var mFrame = this.calculatorMFrame(layer, layerWidth, layerHeight, startX, startY, cTime, (layer.matchName == "ADBE AV Layer"))
-                position.setValueAtTime(cTime, [mFrame["newOrginX"], mFrame["newOrginY"], 0])
+                // position.setValueAtTime(cTime, [mFrame["newOrginX"], mFrame["newOrginY"], 0])
+                allLayerPositions[copyLayer.name].push([mFrame["newOrginX"], mFrame["newOrginY"],0])
                 mask["outputFrame"] = mFrame["frame"]
                 curFrameIndexMask.push(mask)
 
@@ -906,7 +948,7 @@ var DynamicMp4Conveter = (function() {
               if (frameIndex == frameRate) {
                     logMessage("maxHeight," + maxHeight + ",startY:"+startY+",trueHeight:" + trueHeight);
                     if (maxHeight < stepMaxHeight) {
-                        maxHeight = stepMaxHeight
+                        maxHeight = stepMaxHeight 
                     } 
                 }
 
@@ -915,9 +957,17 @@ var DynamicMp4Conveter = (function() {
                 "data": curFrameIndexMask,
             })
             frameIndex++;
+        } 
+        
+        for (var k = 0; k < allCopyLayer.length; k++) {
+            var currentLayer = allCopyLayer[k];
+            if (currentLayer != null && currentLayer != undefined) { 
+                var positions = allLayerPositions[currentLayer.name]
+                var position = currentLayer.property("ADBE Transform Group").property("ADBE Position");
+                position.setValuesAtTimes(times, positions)  
+            }
         }
  
-
         for (var k = 0; k < allCopyLayer.length; k++) {
             var currentLayer = allCopyLayer[k];
             if (currentLayer != null && currentLayer != undefined) {
@@ -1421,8 +1471,8 @@ function checkMode()
 {
      //判断当前是否有mask引用
       var compoItemUtils = new AECompoItemUtils(app);
-      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,app.project.activeItem);
-      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,app.project.activeItem);
+      txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,app.project.activeItem,false);
+      imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,app.project.activeItem,false);
 
       if (txtCompoItem == undefined && imgCompoItem == undefined) {
         return 1
@@ -1444,6 +1494,10 @@ function beginConverter(tempPath)
 {  
     var compoItem = app.project.activeItem
 
+    outPath = tempPath
+
+    beginConverterJson = undefined
+
     if (checkValidCompItem(compoItem) == false) {
         return undefined;
     }
@@ -1457,16 +1511,27 @@ function beginConverter(tempPath)
     if (mode == 1) { //normal
         logMessage("转换模式为:普通透明MP4");
         var result = startConverter_Alpha(tempPath)
-        result =  {"mode":1,"data":result}
-        return JSON.stringify(result)
+        var resultJson =  {"mode":1,"data":result}
+         var out = JSON.stringify(resultJson)  
+         return out
     } else if (mode == 2) {  //dynamic
         logMessage("转换模式为: 混合MP4");
         var result = startConverter_Effect(tempPath)
-        result = {"mode":2,"data":result}
-        return JSON.stringify(result)
+        if (result != undefined) {
+            beginConverterJson = result
+            result = {"mode":2,"data":result}
+            var out =  JSON.stringify(result)
+            return out
+        }
+        return undefined  
     } 
 }
 
+function nextDeal(){  
+   var outJsonStr = mp4Conveter.nextDeal(beginConverterJson,outPath)
+   var result = {"mode":2,"data":outJsonStr} 
+   return  JSON.stringify(result)
+}
 
 //流程
 //1.判断图层合法性（checkSelectInvalide）
@@ -1491,7 +1556,7 @@ function startConverter_Effect(tempPath) {
     }
     
 
-    var mp4Conveter = new DynamicMp4Conveter(app);
+    mp4Conveter = new DynamicMp4Conveter(app);
     var json = mp4Conveter.beginConveter(tempPath)
     return json;
 }
@@ -1499,8 +1564,8 @@ function startConverter_Effect(tempPath) {
 function checkMaskWidthHeight()
 {
       var compoItemUtils = new AECompoItemUtils(app);
-      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,app.project.activeItem);
-      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,app.project.activeItem);
+      var txtCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Text,app.project.activeItem,false);
+      var imgCompoItem = compoItemUtils.maskCompoWithJudgeName(MaskCompo_Image,app.project.activeItem,false);
  
       
       var activeWidth = app.project.activeItem.width
@@ -1553,8 +1618,9 @@ function startConverter_Alpha(aviPath) {
     var file = renderQueue(compoItem,aviPath)
  
 
-    var width = app.project.activeItem.width;
-    var height = app.project.activeItem.height;
+    var width = compoItem.width;
+    var height = compoItem.height;
+ 
  
     var outputJson = {
             "descript": {
@@ -1564,8 +1630,8 @@ function startConverter_Alpha(aviPath) {
                 "version": AE_Extension_Version,
                 "rgbFrame": [0, 0, width * 0.5, height],
                 "alphaFrame": [width * 0.5, 0, width * 0.5, height],
-                "fps":app.project.activeItem.frameRate,
-                "hasAudio":app.project.activeItem.hasAudio
+                "fps":compoItem.frameRate,
+                "hasAudio":compoItem.hasAudio
             }, 
         };
             var result = {
@@ -1573,7 +1639,9 @@ function startConverter_Alpha(aviPath) {
             "evaJson": JSON.stringify(outputJson)
         };
 
+
         var json = JSON.stringify(result)
+ 
         return json; 
 }
 

@@ -19,6 +19,11 @@ var fs = require('fs')
 var spawn = require('child_process'); 
 var AdmZip = require("adm-zip");
 https = require('https');
+var esp = require("cep-extendscript-eval-promise")
+
+var UpgradeErrorCode_ZipZXPFile = 1
+var UpgradeErrorCode_ZipFFmpegFile = 1
+
 
 var CURRENT_FILE_PATH;
 var CURRENT_SOURCE_NAME;
@@ -58,6 +63,181 @@ var LogFile = 'Log.txt'
 var currentChanegFile = "logs ";
 
 var progress = 0;
+
+
+function upgradeErrorCodeMessage(errorCode,msg){
+    return "升级失败[code= "+ UpgradeErrorCode_ZipZXPFile +"]，请联系管理员QQ群:981738110\n 失败原因：" + msg
+}
+
+function checkUpradeIfNeed(){ 
+    if (fs.existsSync(aePluginLogFile)) {
+        fs.unlinkSync(aePluginLogFile)
+        aePluginLog("插件日志：" + aePluginLogFile + "删除成功")
+    }   
+    aePluginLog("开始下载VersionFile文件：" + versionFileUrl)
+    //check 版本
+    downloadFileWithLog(versionFileUrl, versionDownloadFile, function(progress){
+        showModalUpgradeTip("下载VersionFile文件中," + progress + "%" )
+    },function (error) {   
+        aePluginLog("下载VersionFile文件失败，升级失败")
+        return
+    },function () {   
+        showModalUpgradeTip(true,"检测升级中...") 
+        var newestVersion = 0
+        var currentVersion = 0
+        if (fs.existsSync(versionDownloadFile)) {
+            newestVersion = parseInt(fs.readFileSync(versionDownloadFile, 'utf-8'));
+        } 
+        aePluginLog("versionFile文件下载完成：" + versionDownloadFile + ",newestVersion:" + newestVersion )
+        var CURRENT_PROJECT_PATH = csInterface.getSystemPath(SystemPath.APPLICATION);
+        var saveVersFile = nodePath.join(CURRENT_PROJECT_PATH, 'versionFile')
+        
+        if (fs.existsSync(saveVersFile)) {
+            currentVersion = parseInt(fs.readFileSync(saveVersFile, 'utf-8'));
+        }  
+        aePluginLog("version对比 newestVersion:" + newestVersion + "----currentVersion:" + currentVersion ) 
+        if (fs.existsSync(versionDownloadFile)) {
+            fs.unlinkSync(versionDownloadFile)
+        } 
+        var fmpagBefore =  nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
+        //判断是否包含ffmpeg文件
+        if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+            fmpagBefore = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
+        }  
+        aePluginLog("fmpagBefore文件地址:" + fmpagBefore ) 
+        var hasNewVersion =  currentVersion < newestVersion
+        
+        if (!fs.existsSync(fmpagBefore)) {
+            aePluginLog("fmpagBefore不存在，强制再下载一遍 no exits fmpagBefore" ) 
+            hasNewVersion = true
+        } 
+
+        if (!hasNewVersion) {
+            showModalUpgradeTip(false,"检测升级中")
+            return
+        }
+
+        aePluginLog("hasNewVersion：" + hasNewVersion )  
+        
+        if (hasNewVersion) {  
+            confirmMessages("Hi，YYEVA插件有更新的版本了哦，更新一下? \\n tip: 下载过慢可以到官网下载最新版本安装哦。", function () { 
+                var ffmpegFile  
+                var ffmpegDonwloadFile
+                var ffmpegInExtensionFile 
+                showModalUpgradeTip(true,"升级中...\n下载ZXP安装包")      
+                aePluginLog("begin Donwload zxpUrl:" + zxpUrl)         
+                aePluginLog("下载的地址:zxpFile:" + zxpFile)         
+
+                //下载unzip包 
+
+
+                downloadFileWithLog(zxpUrl, zxpFile,function(progress) {
+                    showModalUpgradeTip(true,"下载ZXP安装包中," + progress + "%")      
+                },function(err) {
+                    aePluginLog("下载zxpFile文件失败，升级失败")
+                    return
+                } , function () { 
+                    aePluginLog("Donwload zxp success")         
+                    showModalUpgradeTip(true,"升级中\n删除旧的ZXP安装包")     
+                    
+                    ffmpegFile_zip = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.zip');
+                    showModalUpgradeTip(true,"升级中\n解压缩zxp包") 
+                    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                        ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg');
+                        ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/mac/ffmpeg.zip"; 
+                        ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/mac/ffmpeg')
+                    } else { 
+                        ffmpegDonwloadFile =  "https://raw.githubusercontent.com/yylive/YYEVA/main/AEP/build/windows/ffmpeg.zip"; 
+                        ffmpegFile = nodePath.join(csInterface.getSystemPath(SystemPath.MY_DOCUMENTS), 'ffmpeg.exe');                                
+                        ffmpegInExtensionFile = nodePath.join(CURRENT_PROJECT_PATH, '/localbin/windows/ffmpeg.exe')
+                    } 
+                    aePluginLog("ffmpegFile:" + ffmpegFile + "----"  + "ffmpegDonwloadFile:" + ffmpegDonwloadFile + "----"  + "ffmpegInExtensionFile:" + ffmpegInExtensionFile+ "----"  + "ffmpegFile_zip:" + ffmpegFile_zip)
+                    
+                    var zxpZipTool = new AdmZip(zxpFile)
+                    aePluginLog("解压缩zxpFile:" + zxpFile)
+
+                    zxpZipTool.extractAllToAsync(CURRENT_PROJECT_PATH,true,true,function(error) {
+                        if (error) {
+                            var errorMessage = upgradeErrorCodeMessage(UpgradeErrorCode_ZipZXPFile,error.message)
+                            aePluginLog(errorMessage)
+                            alert(upgradeErrorCodeMessage(errorMessage))
+                            return
+                        }
+                        aePluginLog("完成解压缩zxpFile:" + zxpFile)
+                        var hasFmpg = fs.existsSync(ffmpegFile) 
+                        var hasFmpgInExtension = fs.existsSync(ffmpegInExtensionFile) 
+
+                        if (!hasFmpgInExtension) {
+                            aePluginLog("hasFmpg文件是否存在:" + hasFmpg)
+                        if (hasFmpg) {
+                            showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...拷贝中")
+                            fs.chmodSync(ffmpegFile,0o777)
+                            aePluginLog("修改权限文件成功")
+                            //拷贝过来
+                            try{
+                                    aePluginLog("复制文件")
+                                    fs.copyFileSync(ffmpegFile,ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                    aePluginLog("复制城")
+                                    fs.unlinkSync(zxpFile)
+                                    aePluginLog("删除成功")
+                                    alertMessage("更新完成，即将重启。")
+                                    csInterface.closeExtension()
+                            } catch (e) {
+                                    alertMessage(e)
+                            }
+                        } else {
+                                showModalUpgradeTip(true,"准备ffmpeg环境，大概几分钟就可以完成...下载中")
+                                aePluginLog("不存在ffmpeg，需要下载")
+                                downloadFileWithLog(ffmpegDonwloadFile,ffmpegFile_zip,function(progress) {
+                                    showModalUpgradeTip(true,"下载ffmpeg安装包中," + progress + "%")      
+                                },function(err) {
+                                    aePluginLog("下载ffmpeg文件失败，升级失败")
+                                    return
+                                } ,  function () {
+                                    aePluginLog("开始解压缩ffmepg.zip："  + ffmpegFile_zip)
+                                    if (fs.existsSync(ffmpegFile_zip)) {
+                                        var ffmpegZipTool = new AdmZip(ffmpegFile_zip)
+                                        ffmpegZipTool.extractAllToAsync(/*target path*/csInterface.getSystemPath(SystemPath.MY_DOCUMENTS) , /*overwrite*/ true,true,function(error){
+                                            if (error) {
+                                                var errorMessage = upgradeErrorCodeMessage(UpgradeErrorCode_ZipFFmpegFile,error.message)
+                                                aePluginLog(errorMessage)
+                                                alert(upgradeErrorCodeMessage(errorMessage))
+                                                return
+                                            }
+                                            aePluginLog("解压缩ffmepg.zip：成功"  + ffmpegFile_zip + ",ffmpegFile:" + ffmpegFile + "isExits:" + fs.existsSync(ffmpegFile))
+                                            fs.chmodSync(ffmpegFile,0o777)  
+                                            aePluginLog("修改ffmpegFile权限成功成功"  + ffmpegFile)   
+                                            try{    
+                                                aePluginLog("拷贝ffmpegFile到插件目录"  + ffmpegInExtensionFile)   
+                                                fs.copyFileSync( ffmpegFile, ffmpegInExtensionFile, fs.constants.COPYFILE_EXCL)
+                                                aePluginLog("拷贝ffmpegFile到插件成功")   
+                                                fs.unlinkSync(zxpFile);
+                                                alertMessage("更新完成，即将重启。")
+                                                csInterface.closeExtension()
+                                            } catch (e) {
+                                                alertMessage(e)
+                                            }
+                                        })  
+                                    } else {
+                                        aePluginLog("解压缩ffmepg.zip失败，文件不存在："  + ffmpegFile_zip)
+                                    }
+                                    
+                                }) 
+                            } 
+                        }  else {
+                            fs.unlinkSync(zxpFile);
+                            alertMessage("更新完成，即将重启。")
+                            csInterface.closeExtension()
+                        }
+                    })
+                });
+            }, function () {
+                aePluginLog("手动取消升级 cancel upgrade") 
+                showModalUpgradeTip(false,"检测升级中")
+            });
+        }
+    });
+}
 
 
 function downloadFileWithLog(url, filename, progressCallback,failcallback,callback) { 
@@ -167,8 +347,7 @@ function getPluginVersion() {
     const data = fs.readFileSync(`${path}/CSXS/manifest.xml`);
 
     var version = "";
-
-
+ 
     if (window.DOMParser) {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data.toString(), 'text/xml');
@@ -194,11 +373,14 @@ function getPluginVersion() {
 
 
 window.onload = function () {
+
     csInterface.addEventListener("LogMessageEvent",aeLogMessageEvent)
     //需要补充 active project change事件
     var version =  (getPluginVersion())
 
     document.getElementById("ae_ver_text").innerText = "插件版本:" + version;
+
+    checkUpradeIfNeed()
 
 }
 
@@ -489,11 +671,12 @@ function beginConverter(){
     }
 
     createAELogDirIfNeed(function () {
+
         logFile("日志目录准备完成")
 
         if (!checkCRFValide()) {
             return;
-        }
+        } 
 
         _beginConveterInternal();
     })
@@ -567,31 +750,43 @@ function _beginConveterInternal(){
         updateProcess(progress) 
         progress = 0.3
         updateProcess(progress,"临时目录准备完成") 
-        csInterface.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')", function (res) {
 
-            if (res == undefined) {
-                return
-            }  
- 
-            res = JSON.parse(res)
-            var mode = res["mode"]  
-            var data = res["data"]
+        logFile('beginConverter star')
 
-            var pathObj = mode == 1 ? replaceSuffix(outputPath,"normal") : replaceSuffix(outputPath,"dynamic") 
-            var outFile_264 = pathObj.path_264;
-            var outFile_265 = pathObj.path_265;
-
-            var tempPathObj = replaceSuffix(outputTempPath)
-            var outputTempPath_264 = tempPathObj.path_264;
-            var outputTempPath_265 = tempPathObj.path_265;
-
-            var successMsg = "mp4转换成功"
-
-            logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
-            
-            var jsonStr = data
+        esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')").then(out =>{
             progress = 0.5
-            updateProcess(progress,"AE工程解析完成")
+            updateProcess(progress,"图层解析完毕，开始渲染") 
+            logFile('beginConverter end') 
+
+            if (out == undefined) {
+                logFile("beginConverter end undefined")
+                return
+            }     
+
+            logFile('nextDeal begin') 
+            function nextDellComplete(resJson) {  
+                progress = 0.7
+                updateProcess(progress,"合成渲染完毕，开始输出资源")
+ 
+                var res = JSON.parse(resJson)
+                var mode = res["mode"]  
+                var data = res["data"]   
+ 
+                var pathObj = mode == 1 ? replaceSuffix(outputPath,"normal") : replaceSuffix(outputPath,"dynamic") 
+                var outFile_264 = pathObj.path_264;
+                var outFile_265 = pathObj.path_265;
+
+                var tempPathObj = replaceSuffix(outputTempPath)
+                var outputTempPath_264 = tempPathObj.path_264;
+                var outputTempPath_265 = tempPathObj.path_265;
+
+                var successMsg = "mp4转换成功"  
+
+                logFile('创建临时文件成功  \n 264输出临时路径' + outputTempPath_264 + '\n 265输出临时路径' + outputTempPath_265)
+            
+                var jsonStr = data
+                progress = 0.8
+                updateProcess(progress,"AE工程解析完成")
             if (jsonStr == 'undefined' || jsonStr == "") {
                 logFile('json is undefined');
                 showModalTip(false)
@@ -614,7 +809,7 @@ function _beginConveterInternal(){
             let success264 = false;
             let success265 = false;
 
-            progress = 0.7;
+            progress = 0.9;
             updateProcess(progress,"Json数据压缩完成");
 
             if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
@@ -629,8 +824,7 @@ function _beginConveterInternal(){
 
                 success264 = true
                 logFile('完成转换264' + "success265 :" + success265 + "success264" + success264);
-
-                progress += 0.1;
+ 
                 updateProcess(progress,"h264的metadata数据已写入");
 
                 if (success264 && success265) {
@@ -651,8 +845,7 @@ function _beginConveterInternal(){
                 }  
                 success265 = true
                 logFile('完成转换265' + "success265 :" + success265 + "success264" + success264);
-
-                progress += 0.1;
+ 
 
                 updateProcess(progress,"h265的metadata数据已写入");
 
@@ -665,11 +858,22 @@ function _beginConveterInternal(){
                     }, 250);
                     logFile('全部完成转换');
                 }
-            });
+            }); 
+            } 
 
-            
+            var outJson = JSON.parse(out)
+            var mode = outJson["mode"]
+  
+            if (mode == 1) {
+                nextDellComplete(out)
+            } else {
+                esp.evalScript("nextDeal()").then(resJson=>nextDellComplete(resJson)); 
+            }
+  
+        })  
 
-        });
+        // csInterface.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')", function (out) {
+        // });
     });
 }
 
@@ -703,8 +907,7 @@ function _startConvert() {
         updateProcess(progress,"临时目录准备完成")
 
         csInterface.evalScript("startConverter('" + TEMP_SOURCE_PATH + "')", function (json) {
-           
-
+            
         });
     });
 }
@@ -911,16 +1114,29 @@ function writeStringToTmpFile(string, file) //'\\myOutput.txt'
 
 function getBaseLog(isJs) {
     var tag = isJs ? "js" : "jsx"
-    var base = '[' + tag +  ']' + '[' + CEP_Plugin_Version + ']' + ">>>";
+    var timeStr = getCurrentTime()
+    var base = '[' + tag +  ']' + '[' + CEP_Plugin_Version + ']'  + '[' + timeStr + ']' + ">>>";
     return base
 }
 
 function logFile(logText) {
-    var outputFile = LOG_PATH + pathSeprator() + currentChanegFile
-
+    var outputFile = LOG_PATH + pathSeprator() + currentChanegFile  
     //格式
     fs.appendFileSync(outputFile, getBaseLog(true)  + logText + '\n' + '\n')
 }
+
+function getCurrentTime() {
+    // 获取当前时间
+    var date = new Date() 
+    let mm = date.getMonth() + 1;
+    let dd = date.getDate();
+    let hh = date.getHours();
+    let mf = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
+    let ss = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    let mss = date.getMilliseconds();    //获取当前毫秒数(0-999)
+    return `${mm}-${dd} ${hh}:${mf}:${ss}:${mss}`;
+  }
+   
 
 function aePluginLog(logText) {
     //格式
@@ -931,7 +1147,8 @@ function aePluginLog(logText) {
 
 function logJSXFile(logText) {
     var outputFile = LOG_PATH + pathSeprator() + currentChanegFile
-    fs.appendFileSync(outputFile, getBaseLog(false)   + logText + '\n'  + '\n')
+    var timeStr = getCurrentTime()
+    fs.appendFileSync(outputFile, getBaseLog(false) + logText + '\n'  + '\n')
 }
 
 
