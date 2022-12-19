@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 
-<ExtensionManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="6.0" ExtensionBundleId="com.yy.aeconverterformp4" ExtensionBundleVersion="2.3.7" ExtensionBundleName="MP4Conveter">
+<ExtensionManifest xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="6.0" ExtensionBundleId="com.yy.aeconverterformp4" ExtensionBundleVersion="2.3.5" ExtensionBundleName="MP4Conveter">
     <ExtensionList>
-        <Extension Id="com.yy.aeconverterformp4" Version="2.3.7"/>
+        <Extension Id="com.yy.aeconverterformp4" Version="2.3.5"/>
     </ExtensionList>
     <ExecutionEnvironment>
         <HostList>
