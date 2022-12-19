@@ -575,8 +575,8 @@ var DynamicMp4Conveter = (function() {
     DynamicMp4Conveter.prototype.nextDeal = function(outputJson,tempPath){ 
         logMessage("nextDeal begin")  
         var hiddenLayers = [];  
-        var txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,copyOutcompoItem);
-        var imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,copyOutcompoItem);
+        var txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,app.project.activeItem);
+        var imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,app.project.activeItem);
         if (txtCompoItemUserInLayer != undefined) {
             hiddenLayers = hiddenLayers.concat(txtCompoItemUserInLayer)
         } 
