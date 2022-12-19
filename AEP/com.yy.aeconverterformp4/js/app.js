@@ -819,7 +819,7 @@ function _beginConveterInternal(){
             convertAviToMP4(movFile, outputTempPath_264, encodeLevel, MP4EnCodeType.avc, function () {
                 if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
                     // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson);
+                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson,'tmp_write_h264.sh');
                 }  
 
                 success264 = true
@@ -841,7 +841,7 @@ function _beginConveterInternal(){
             convertAviToMP4(movFile, outputTempPath_265, encodeLevel, MP4EnCodeType.hevc, function () {
                 if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
                     // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson);
+                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson,'tmp_write_h265.sh');
                 }  
                 success265 = true
                 logFile('完成转换265' + "success265 :" + success265 + "success264" + success264);
@@ -1063,7 +1063,7 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, callback) {
 
  
 
-function writeJsonToMp4MetaData(mp4TempFile, mp4File, json) {
+function writeJsonToMp4MetaData(mp4TempFile, mp4File, json, shFile) {
     if (json.length == 0) {
         alertMessage('转换完成');
         return;
@@ -1072,11 +1072,11 @@ function writeJsonToMp4MetaData(mp4TempFile, mp4File, json) {
     var templateStart = "yyeffectmp4json[["
     var templateEnd = "]]yyeffectmp4json"
     json =  templateStart + json + templateEnd
-    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags " + addPathUpDot(mp4File);
-    writeStringToTmpFile(writeJsonCmd, 'writeJsonToMp4MetaData.txt')
-    logFile("写入Json到MetaData" + ",mp4TempFile:" + mp4TempFile + ",mp4File:" + mp4File)
+    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags -y " + addPathUpDot(mp4File);
+    var writeSHFile = writeStringToTmpFile(writeJsonCmd, shFile)
+    logFile("写入Json到MetaData" + ",mp4TempFile:" + mp4TempFile + ",mp4File:" + mp4File +",字符串长度 :" + (json.length) + ',shFile : ' + writeSHFile)
     var process = require('child_process');
-    process.exec(writeJsonCmd, function (error, stdout, stderr) {
+    process.exec('sh ' + writeSHFile , function (error, stdout, stderr) {
         logFile("mov转MP4完成")
         callback();
     });
@@ -1110,6 +1110,7 @@ function writeStringToTmpFile(string, file) //'\\myOutput.txt'
 {
     var outputFile = pathSeprator() + file
     fs.appendFileSync(TEMP_SOURCE_PATH + outputFile, string + '\n')
+    return TEMP_SOURCE_PATH + outputFile
 }
 
 function getBaseLog(isJs) {
