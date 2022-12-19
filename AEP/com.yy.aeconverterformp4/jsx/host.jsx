@@ -574,9 +574,19 @@ var DynamicMp4Conveter = (function() {
 
     DynamicMp4Conveter.prototype.nextDeal = function(outputJson,tempPath){ 
         logMessage("nextDeal begin")  
-        var hiddenLayers = [];  
-        var txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,app.project.activeItem);
-        var imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,app.project.activeItem);
+        var hiddenLayers = [];   
+        var txtCompoItemUserInLayer = []
+        var imgCompoItemUserInLayer  = []
+        if (needCleanCom == true && this.activeItem != undefined) {
+            txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,app.project.activeItem);
+            imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,app.project.activeItem);
+        } else {
+            txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,copyOutcompoItem);
+            imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,copyOutcompoItem);
+
+        }
+    
+    
         if (txtCompoItemUserInLayer != undefined) {
             hiddenLayers = hiddenLayers.concat(txtCompoItemUserInLayer)
         } 
@@ -601,6 +611,7 @@ var DynamicMp4Conveter = (function() {
         }
         logMessage("needCleanCom:" + needCleanCom)  
         if (needCleanCom == true && this.activeItem != undefined) {
+            this.compoItemUtils.showLayers(hiddenLayers)
             this.activeItem.remove()
         }
         
