@@ -23,6 +23,7 @@ var EFFECT_TAG_TYPE_IMAGE = "img"
 }
  
  
+ 
 var AECompoItemUtils = (function() {
     function AECompoItemUtils(app) {
         this.app = app;
@@ -264,31 +265,47 @@ var AECompoItemUtils = (function() {
 
         }
     }
-    AECompoItemUtils.prototype.findCompoUsedIn = function(compItem,activeItem) {
+    AECompoItemUtils.prototype.findCompoUsedIn = function(compItem,activeItem,arry,matchRule) {
 
         if (compItem == null || compItem == undefined) {
             return undefined;
-        }
-
-        var sourceLayers = [];
+        } 
+ 
         var useInItems = compItem.usedIn;
-
-        if (useInItems.length > 0) {
+ 
+        if (useInItems.length > 0) { 
             for (var i = 0; i < useInItems.length; i++) {
-                var item = useInItems[i];
-                if (item instanceof CompItem && item == activeItem) {
-                    var subLayerCollection = item.layers;
-                    for (var j = 1; j <= subLayerCollection.length; j++) {
-                        var contentLayer = subLayerCollection[j];
-                        if (contentLayer.name.match("mask_") != null) {
-                            sourceLayers.push(contentLayer)
-                        }
+                var item = useInItems[i]; 
+                if (item instanceof CompItem) {
+                    if (item == activeItem) {  
+                        this.findCompItemHasMask_Layer(item,arry,matchRule)  
+                    } else { 
+                       this.findCompoUsedIn(item,activeItem,arry,matchRule) 
                     }
                 }
             }
-        }
-        return sourceLayers;
+        }  
     }
+
+    AECompoItemUtils.prototype.findCompItemHasMask_Layer = function(item,arry,matchRule) { 
+        var subLayerCollection = item.layers;  
+        if (subLayerCollection == undefined || subLayerCollection.length == 0) {
+            return undefined
+        }
+        for (var j = 1; j <= subLayerCollection.length; j++) {
+            var contentLayer = subLayerCollection[j];
+            if (contentLayer.name.match(matchRule) != null) {
+                 arry.push(contentLayer) 
+            }
+             else { 
+                var item = contentLayer.source    
+                if (item != undefined && item instanceof CompItem) {
+                    this.findCompItemHasMask_Layer(item,arry,matchRule)    
+                } 
+            }
+        }  
+    }
+
     AECompoItemUtils.prototype.hiddenLayer = function(layers) {
         logMessage("hiddenLayer.length:" + layers.length) 
         for (var i = 0; i < layers.length; i++) {
@@ -376,7 +393,7 @@ var DynamicMp4Conveter = (function() {
             return newOutComp 
     }
   
-    DynamicMp4Conveter.prototype.beginConveter = function(tempPath) { 
+    DynamicMp4Conveter.prototype.beginConveter = function(tempPath,selectAlphaMode) { 
         
         logMessage("beginConveter begin")  
         
@@ -460,14 +477,23 @@ var DynamicMp4Conveter = (function() {
         var outCompH = activeItem.height
  
 
+
         var aspectAlphaRatio  = 0.5
+
+        if (selectAlphaMode == 0) {
+            //宽高比大于2的时候 alpha区域要调整到1倍
+            if (outCompW / outCompH > 2 || outCompH / outCompW > 2) {
+             aspectAlphaRatio = 1
+            } else {
+                aspectAlphaRatio = 0.5
+            }  
+        } else  if (selectAlphaMode == 1) {
+               aspectAlphaRatio = 0.5
+        } else  if (selectAlphaMode == 2) {
+               aspectAlphaRatio = 1.0
+        }
         
-        //宽高比大于2的时候 alpha区域要调整到1倍
-        if (outCompW / outCompH > 2 || outCompH / outCompW > 2) {
-            aspectAlphaRatio = 1
-        } else {
-            aspectAlphaRatio = 0.5
-        } 
+         
  
         logMessage("scaleAlpha aspect:" + aspectAlphaRatio)
          
@@ -577,15 +603,13 @@ var DynamicMp4Conveter = (function() {
         var hiddenLayers = [];   
         var txtCompoItemUserInLayer = []
         var imgCompoItemUserInLayer  = []
-        if (needCleanCom == true && this.activeItem != undefined) {
-            txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,app.project.activeItem);
-            imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,app.project.activeItem);
-        } else {
-            txtCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(txtCompoItem,copyOutcompoItem);
-            imgCompoItemUserInLayer = this.compoItemUtils.findCompoUsedIn(imgCompoItem,copyOutcompoItem);
-
-        }
-    
+        if (needCleanCom == true && this.activeItem != undefined) { 
+             this.compoItemUtils.findCompoUsedIn(txtCompoItem,app.project.activeItem,txtCompoItemUserInLayer,"mask_text");
+             this.compoItemUtils.findCompoUsedIn(imgCompoItem,app.project.activeItem,imgCompoItemUserInLayer,"mask_image");
+        } else { 
+            this.compoItemUtils.findCompoUsedIn(txtCompoItem,app.project.activeItem,txtCompoItemUserInLayer,"mask_text");
+             this.compoItemUtils.findCompoUsedIn(imgCompoItem,app.project.activeItem,imgCompoItemUserInLayer,"mask_image");
+        } 
     
         if (txtCompoItemUserInLayer != undefined) {
             hiddenLayers = hiddenLayers.concat(txtCompoItemUserInLayer)
@@ -593,10 +617,12 @@ var DynamicMp4Conveter = (function() {
         if (imgCompoItemUserInLayer != undefined) {
             hiddenLayers = hiddenLayers.concat(imgCompoItemUserInLayer)
         }
-
-        this.compoItemUtils.hiddenLayer(hiddenLayers)
+ 
+         if (hiddenLayers.length > 0 ) {
+            this.compoItemUtils.hiddenLayer(hiddenLayers)
+        }
         var aviFile = renderQueue(copyOutcompoItem, tempPath)
-
+  
         if (copyOutcompoItem) {
             logMessage("copyOutcompoItem remove begin") 
             copyOutcompoItem.remove();
@@ -610,8 +636,10 @@ var DynamicMp4Conveter = (function() {
             "evaJson": JSON.stringify(outputJson)
         }
         logMessage("needCleanCom:" + needCleanCom)  
-        if (needCleanCom == true && this.activeItem != undefined) {
+        if (hiddenLayers.length > 0 ) {
             this.compoItemUtils.showLayers(hiddenLayers)
+        }
+        if (needCleanCom == true && this.activeItem != undefined) {
             this.activeItem.remove()
         }
         
@@ -1487,25 +1515,17 @@ function checkMode()
 
       if (txtCompoItem == undefined && imgCompoItem == undefined) {
         return 1
-      } else {
-        var ratio = getAlphaRatio()
-        //计算一个合适的比例值 0.5 < x <= 1
+      } else { 
         return 2
       }
 }
+ 
 
-function getAlphaRatio()
-{
-
-
-    return 0.5
-}
-
-function beginConverter(tempPath)
-{  
+function beginConverter(tempPath,level)
+{   
     var compoItem = app.project.activeItem
 
-    outPath = tempPath
+    outPath = tempPath  
 
     beginConverterJson = undefined
 
@@ -1527,7 +1547,7 @@ function beginConverter(tempPath)
          return out
     } else if (mode == 2) {  //dynamic
         logMessage("转换模式为: 混合MP4");
-        var result = startConverter_Effect(tempPath)
+        var result = startConverter_Effect(tempPath,level)
         if (result != undefined) {
             beginConverterJson = result
             result = {"mode":2,"data":result}
@@ -1547,7 +1567,7 @@ function nextDeal(){
 //流程
 //1.判断图层合法性（checkSelectInvalide）
 //2.获取所有的Mask合成 (以合成命名为mask_为开头的图层)
-function startConverter_Effect(tempPath) {
+function startConverter_Effect(tempPath,selectAlphaMode) {
 
     var compoItem = app.project.activeItem
 
@@ -1565,10 +1585,10 @@ function startConverter_Effect(tempPath) {
         logMessage("mask合成的宽高不符合规范");
         return undefined;
     }
+  
     
-
     mp4Conveter = new DynamicMp4Conveter(app);
-    var json = mp4Conveter.beginConveter(tempPath)
+    var json = mp4Conveter.beginConveter(tempPath,selectAlphaMode)
     return json;
 }
 

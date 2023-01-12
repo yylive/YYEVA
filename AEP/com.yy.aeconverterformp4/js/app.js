@@ -47,6 +47,14 @@ var MP4EnCodeLevel = {
     high: 2,
     customer:3,
 };
+
+var AlphaLevel = {
+    Auto: 0,
+    Lower: 1,
+    Hight: 2,
+};
+
+
 var MP4EnCodeType = {
     avc: 0,
     hevc: 1
@@ -58,13 +66,13 @@ var MP4ConverMode = {
 }
 
 var encodeLevel = MP4EnCodeLevel.mid;
+var alphaRatioLevel = AlphaLevel.Auto;
 
 var LogFile = 'Log.txt'
 var currentChanegFile = "logs ";
 
 var progress = 0;
-
-
+ 
 function upgradeErrorCodeMessage(errorCode,msg){
     return "升级失败[code= "+ UpgradeErrorCode_ZipZXPFile +"]，请联系管理员QQ群:981738110\n 失败原因：" + msg
 }
@@ -381,8 +389,48 @@ window.onload = function () {
     document.getElementById("ae_ver_text").innerText = "插件版本:" + version;
 
     checkUpradeIfNeed()
+ 
+    checkEnvironments()
 
 }
+
+function checkEnvironments(){
+    checkYYEVATemplate()
+    checkYYEVAFfmpegTemplate()
+}
+
+
+function checkYYEVATemplate(){
+    esp.evalScript("checkHasConverTemplate()").then(out =>{
+       
+         if (out == "0") {
+            document.getElementById("yyevaTemplateExitsLabel").innerHTML =  "检查YYEVA模板完成--- 【❌❌❌❌❌】检查失败"
+         } else if (out == "1") {
+            document.getElementById("yyevaTemplateExitsLabel").innerHTML =  "检查YYEVA模板完成--- 【❌❌❌❌❌】YYEVA模板不存在"
+         } else if (out == "2") {
+            document.getElementById("yyevaTemplateExitsLabel").innerHTML =  "检查YYEVA模板完成--- 【✅✅✅✅✅】YYEVA模板存在"
+         }
+    });
+}
+
+function checkYYEVAFfmpegTemplate(){
+    var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
+    var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
+    var ffmpegFile = false 
+    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+        ffmpegFile  = ffmpegUrl_mac 
+    }  else {
+        ffmpegFile = ffmpegUrl_windows
+    }
+    if (fs.existsSync(ffmpegFile)) {
+        document.getElementById("ffmpegExitsLabel").innerHTML =  "检查ffmpeg环境完成---【✅✅✅✅✅】 ffmpeg文件已存在"
+    } else {
+        document.getElementById("ffmpegExitsLabel").innerHTML =  "检查ffmpeg环境完成---【❌❌❌❌❌】 ffmpeg文件不存在 请咨询qq群:981738110"
+    }
+    
+    
+}
+
 
 window.onunload = function () {
     //删除临时文件
@@ -518,6 +566,7 @@ function cleanProject() {
     // document.getElementById("pathtext_dynamic").innerHTML = "未设置"
     document.getElementById("pathtext").innerHTML = "未设置"
     selectLevel(1);
+    selectAlphaMode(0);
 }
  
 function needShowAllCustomerInput(needShow) {
@@ -529,6 +578,37 @@ function needShowAllCustomerInput(needShow) {
         customerLevelInput.style.visibility = needShow ? "visible" : "hidden"
         customerLevelInput.value = "23"
     }
+}
+
+function selectAlphaMode(mode){
+    //mode = 0 自动   mode = 1 手动调整 0.5 <= alpha <= 1
+    var autoBtn = document.getElementsByClassName('autoAlphaButton')
+    var halfBtn = document.getElementsByClassName('halfAlphaButton')
+    var allBtn = document.getElementsByClassName('allAlphaButton') 
+
+    alphaRatioLevel =  mode
+
+    var selectEs = autoBtn;
+    var otherEs = [autoBtn,halfBtn,allBtn];
+
+    if (alphaRatioLevel == AlphaLevel.Auto) {
+        selectEs = autoBtn;
+        otherEs = [halfBtn,allBtn];
+    } else if (alphaRatioLevel == AlphaLevel.Lower) {
+        selectEs = halfBtn;
+        otherEs = [autoBtn,allBtn];
+    } else if (alphaRatioLevel == AlphaLevel.Hight) {
+        selectEs = allBtn;
+        otherEs = [autoBtn,halfBtn];
+    }
+
+    needActiveAllSelectLevel(selectEs,true)
+
+    for (var i = 0;i<otherEs.length;i++) {
+        var levels = otherEs[i]
+        needActiveAllSelectLevel(levels,false);
+    }
+
 }
 
 function selectLevel(level) {
@@ -753,7 +833,7 @@ function _beginConveterInternal(){
 
         logFile('beginConverter star')
 
-        esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')").then(out =>{
+        esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH +  "'," +  "'" + alphaRatioLevel  + "')").then(out =>{
             progress = 0.5
             updateProcess(progress,"图层解析完毕，开始渲染") 
             logFile('beginConverter end') 
@@ -819,7 +899,11 @@ function _beginConveterInternal(){
             convertAviToMP4(movFile, outputTempPath_264, encodeLevel, MP4EnCodeType.avc, function () {
                 if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
                     // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson);
+                    var shFile = 'tmp_write_h264.bat'
+                    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                        shFile =  'tmp_write_h264.sh'
+                    }  
+                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson,shFile);
                 }  
 
                 success264 = true
@@ -841,7 +925,11 @@ function _beginConveterInternal(){
             convertAviToMP4(movFile, outputTempPath_265, encodeLevel, MP4EnCodeType.hevc, function () {
                 if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
                     // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson);
+                    var shFile = 'tmp_write_h265.bat'
+                    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                        shFile =  'tmp_write_h265.sh'
+                    }  
+                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson,shFile);
                 }  
                 success265 = true
                 logFile('完成转换265' + "success265 :" + success265 + "success264" + success264);
@@ -1061,23 +1149,29 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, callback) {
     });
 }
 
+function dealSpaceDir(dir){
+   return dir.replace(" ","\\ ")
+}
  
 
-function writeJsonToMp4MetaData(mp4TempFile, mp4File, json) {
+function writeJsonToMp4MetaData(mp4TempFile, mp4File, json, shFile) {
     if (json.length == 0) {
         alertMessage('转换完成');
         return;
-    }
+    } 
     // yyeffectmp4json[[base64]]
     var templateStart = "yyeffectmp4json[["
     var templateEnd = "]]yyeffectmp4json"
     json =  templateStart + json + templateEnd
-    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags " + addPathUpDot(mp4File);
-    writeStringToTmpFile(writeJsonCmd, 'writeJsonToMp4MetaData.txt')
-    logFile("写入Json到MetaData" + ",mp4TempFile:" + mp4TempFile + ",mp4File:" + mp4File)
+    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags -y " + addPathUpDot(mp4File);
+    var writeSHFile = writeStringToTmpFileNeedDealPath(writeJsonCmd, shFile)
+    var shellCommand =  'sh ' + dealSpaceDir(writeSHFile)
+    logFile("写入Json到MetaData" + writeJsonCmd)
+    logFile("sh Command:" + shellCommand)
     var process = require('child_process');
-    process.exec(writeJsonCmd, function (error, stdout, stderr) {
-        logFile("mov转MP4完成")
+    process.exec(shellCommand , function (error, stdout, stderr) {
+        logFile('StdOut=' + stdout);
+        logFile('StdErr=' + stderr);
         callback();
     });
 }
@@ -1110,6 +1204,15 @@ function writeStringToTmpFile(string, file) //'\\myOutput.txt'
 {
     var outputFile = pathSeprator() + file
     fs.appendFileSync(TEMP_SOURCE_PATH + outputFile, string + '\n')
+    return TEMP_SOURCE_PATH + outputFile
+}
+
+function writeStringToTmpFileNeedDealPath(string, file, encoding) //'\\myOutput.txt'
+{
+    var outputFile =  pathSeprator() + file
+    var file = TEMP_SOURCE_PATH + outputFile 
+    fs.appendFileSync(file, string + '\n' , encoding)
+    return file
 }
 
 function getBaseLog(isJs) {
