@@ -15,31 +15,6 @@ function getActiveItem() {
 }
 
 
-function checkHasConverTemplate() { 
-    var itemSelecltion = app.project.items 
-    var itemLength = itemSelecltion.length
-    var compoItem 
-    for (var i = 1;i < itemLength;i++) {
-        var currentItem = itemSelecltion[i]
-           if (currentItem != undefined && currentItem instanceof CompItem) {
-              compoItem = currentItem
-         }
-      }
-    
-    if (compoItem == undefined) {
-        return 0
-    }
- 
-    app.project.renderQueue.items.add(compoItem)
-    var template = findYYConvertMP4Template(compoItem); 
-    if (template == undefined) { 
-        app.project.renderQueue.item(app.project.renderQueue.numItems).remove();
-        return 1;
-    } 
-    app.project.renderQueue.item(app.project.renderQueue.numItems).remove();
-    return 2;
-}
-
 
 function checkHasConverMP4Template(compoItem) {
     app.project.renderQueue.items.add(compoItem)
@@ -188,13 +163,15 @@ var alertMessage = function(message) {
 function getActiveInfo() {
     if (app.project.file == undefined || app.project.file == null) {
         return "";
-    } 
+    }
+
     if (app.project.file.fsName == undefined || app.project.file.fsName == null) {
         return "";
-    } 
+    }
+
     if (app.project.activeItem == undefined || app.project.activeItem == null) {
         return "";
-    } 
+    }
     // app.project.save();
     var path = app.project.file.fsName + '_and_' + app.project.activeItem.name;
     return path;

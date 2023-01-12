@@ -48,7 +48,6 @@
                 <li class="on">导出工具</li> 
                 <li>导出日志</li>
                 <li>预览</li>
-                <li>插件自查</li>
             </ul>
         </div>
         <div class="set-middle bd">
@@ -69,13 +68,6 @@
                         <button class="highLevelButton" onclick="selectLevel(2)">高</button>
                         <button class="customerButton" onclick="selectLevel(3)">自定义crf</button>
                         <input  type="number" id="customerCRFInput" class="customerCRFInput" value="23" step="1" min="0" max="51"></input>
-                        <br />
-                        <br />
-                        <b id="outputtext">alpha缩放比例</b>
-                        <br />
-                        <button class="autoAlphaButton" onclick="selectAlphaMode(0)">自动调整</button>
-                        <button class="halfAlphaButton" onclick="selectAlphaMode(1)">手动调整:0.5</button> 
-                        <button class="allAlphaButton" onclick="selectAlphaMode(2)">手动调整:1</button> 
                         <br />
                         <br />
                         <button id="converterBtn" onclick="beginConverter()">开始转换</button>
@@ -107,21 +99,6 @@
                     <br /> 
                     <iframe scrolling="auto" style="position: absolute; width: 97%; height: 85%;" src="preview.html"></iframe>
                 </div>
-                </li>
-            </ul>
-
-            <ul class="set-middle-item">
-                <li>
-                    <div role="tabpanel" class="tab-pane fade" id="Section2">  
-                        <br /> 
-                        <br /> 
-                        <div id="checkEnvResultSection" enabled="false">
-                            <b id="yyevaTemplateExitsLabel">检查YYEVA模板是否创建中...</b>
-                            <br /> 
-                            <br /> 
-                            <b id="ffmpegExitsLabel">检查ffmpeg环境是否成功中...</b> 
-                        </div> 
-                    </div> 
                 </li>
             </ul>
 
