@@ -47,6 +47,7 @@ var MP4EnCodeLevel = {
     high: 2,
     customer:3,
 };
+  
 var MP4EnCodeType = {
     avc: 0,
     hevc: 1
@@ -57,14 +58,13 @@ var MP4ConverMode = {
     dynamic:1
 }
 
-var encodeLevel = MP4EnCodeLevel.mid;
+var encodeLevel = MP4EnCodeLevel.mid; 
 
 var LogFile = 'Log.txt'
 var currentChanegFile = "logs ";
 
 var progress = 0;
-
-
+ 
 function upgradeErrorCodeMessage(errorCode,msg){
     return "升级失败[code= "+ UpgradeErrorCode_ZipZXPFile +"]，请联系管理员QQ群:981738110\n 失败原因：" + msg
 }
@@ -381,8 +381,48 @@ window.onload = function () {
     document.getElementById("ae_ver_text").innerText = "插件版本:" + version;
 
     checkUpradeIfNeed()
+ 
+    checkEnvironments()
 
 }
+
+function checkEnvironments(){
+    checkYYEVATemplate()
+    checkYYEVAFfmpegTemplate()
+}
+
+
+function checkYYEVATemplate(){
+    esp.evalScript("checkHasConverTemplate()").then(out =>{
+       
+         if (out == "0") {
+            document.getElementById("yyevaTemplateExitsLabel").innerHTML =  "检查YYEVA模板完成--- 【❌❌❌❌❌】检查失败"
+         } else if (out == "1") {
+            document.getElementById("yyevaTemplateExitsLabel").innerHTML =  "检查YYEVA模板完成--- 【❌❌❌❌❌】YYEVA模板不存在"
+         } else if (out == "2") {
+            document.getElementById("yyevaTemplateExitsLabel").innerHTML =  "检查YYEVA模板完成--- 【✅✅✅✅✅】YYEVA模板存在"
+         }
+    });
+}
+
+function checkYYEVAFfmpegTemplate(){
+    var ffmpegUrl_windows = nodePath.join(curExtensionPath, 'localbin//windows/ffmpeg.exe');
+    var ffmpegUrl_mac = nodePath.join(curExtensionPath, 'localbin/mac/ffmpeg');
+    var ffmpegFile = false 
+    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+        ffmpegFile  = ffmpegUrl_mac 
+    }  else {
+        ffmpegFile = ffmpegUrl_windows
+    }
+    if (fs.existsSync(ffmpegFile)) {
+        document.getElementById("ffmpegExitsLabel").innerHTML =  "检查ffmpeg环境完成---【✅✅✅✅✅】 ffmpeg文件已存在"
+    } else {
+        document.getElementById("ffmpegExitsLabel").innerHTML =  "检查ffmpeg环境完成---【❌❌❌❌❌】 ffmpeg文件不存在 请咨询qq群:981738110"
+    }
+    
+    
+}
+
 
 window.onunload = function () {
     //删除临时文件
@@ -517,7 +557,7 @@ function cleanProject() {
     outputPath = undefined;
     // document.getElementById("pathtext_dynamic").innerHTML = "未设置"
     document.getElementById("pathtext").innerHTML = "未设置"
-    selectLevel(1);
+    selectLevel(1); 
 }
  
 function needShowAllCustomerInput(needShow) {
@@ -530,6 +570,7 @@ function needShowAllCustomerInput(needShow) {
         customerLevelInput.value = "23"
     }
 }
+ 
 
 function selectLevel(level) {
 
@@ -744,6 +785,10 @@ function _beginConveterInternal(){
     progress = 0;
     updateProcess(progress)
     logFile('开始插件转换: level:' + encodeLevel + ",crf:" + customer_crf);
+
+    var checkbox = document.getElementById('scalaAlphaBox'); 
+  
+    var alphaRatioLevel =  checkbox.checked
     
     createTempFolder(function () {
         progress = 0.1; 
@@ -753,7 +798,7 @@ function _beginConveterInternal(){
 
         logFile('beginConverter star')
 
-        esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "')").then(out =>{
+        esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH +  "'," +  "'" + alphaRatioLevel  + "')").then(out =>{
             progress = 0.5
             updateProcess(progress,"图层解析完毕，开始渲染") 
             logFile('beginConverter end') 
@@ -761,8 +806,7 @@ function _beginConveterInternal(){
             if (out == undefined) {
                 logFile("beginConverter end undefined")
                 return
-            }     
-
+            }      
             logFile('nextDeal begin') 
             function nextDellComplete(resJson) {  
                 progress = 0.7
@@ -819,7 +863,11 @@ function _beginConveterInternal(){
             convertAviToMP4(movFile, outputTempPath_264, encodeLevel, MP4EnCodeType.avc, function () {
                 if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
                     // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson);
+                    var shFile = 'tmp_write_h264.bat'
+                    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                        shFile =  'tmp_write_h264.sh'
+                    }  
+                    writeJsonToMp4MetaData(outputTempPath_264, outFile_264, evaJson,shFile);
                 }  
 
                 success264 = true
@@ -841,7 +889,11 @@ function _beginConveterInternal(){
             convertAviToMP4(movFile, outputTempPath_265, encodeLevel, MP4EnCodeType.hevc, function () {
                 if (YYEVA_CUR_WRITE_STYLE == YYEVA_WRITE_STYLE_METADATA) {
                     // alertMessage("当前写入的类型是METADATA")
-                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson);
+                    var shFile = 'tmp_write_h265.bat'
+                    if (csInterface.getOSInformation().indexOf("Mac") >= 0) {
+                        shFile =  'tmp_write_h265.sh'
+                    }  
+                    writeJsonToMp4MetaData(outputTempPath_265, outFile_265, evaJson,shFile);
                 }  
                 success265 = true
                 logFile('完成转换265' + "success265 :" + success265 + "success264" + success264);
@@ -1061,23 +1113,43 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, callback) {
     });
 }
 
+function dealSpaceDir(dir){
+   return dir.replace(" ","\\ ")
+}
  
 
-function writeJsonToMp4MetaData(mp4TempFile, mp4File, json) {
+function writeJsonToMp4MetaData(mp4TempFile, mp4File, json, shFile) {
     if (json.length == 0) {
         alertMessage('转换完成');
         return;
-    }
+    } 
     // yyeffectmp4json[[base64]]
     var templateStart = "yyeffectmp4json[["
     var templateEnd = "]]yyeffectmp4json"
     json =  templateStart + json + templateEnd
-    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags " + addPathUpDot(mp4File);
-    writeStringToTmpFile(writeJsonCmd, 'writeJsonToMp4MetaData.txt')
-    logFile("写入Json到MetaData" + ",mp4TempFile:" + mp4TempFile + ",mp4File:" + mp4File)
+    var writeJsonCmd = addPathUpDot(ffmpegPath()) + ' -i ' + addPathUpDot(mp4TempFile) + " -c copy -metadata mergeinfo=" +  json + " -movflags +use_metadata_tags -y " + addPathUpDot(mp4File);
+    var writeSHFile = writeStringToTmpFileNeedDealPath(writeJsonCmd, shFile)
+
+ 
+    //获取最后一个.的位置
+    var index= shFile.lastIndexOf(".");
+    //获取后缀
+    var ext = shFile.substr(index+1); 
+    var shellCommand =  'sh ' + dealSpaceDir(writeSHFile)
+    if (ext == "sh") {
+        //sh mac
+        shellCommand =  'sh ' + dealSpaceDir(writeSHFile)
+    } else {
+        //windows的bat要针对中文做特殊处理
+        shellCommand =  'chcp 65001 | ' +  dealSpaceDir(writeSHFile)
+    }
+ 
+    logFile("写入Json到MetaData" + writeJsonCmd)
+    logFile("command:" + shellCommand)
     var process = require('child_process');
-    process.exec(writeJsonCmd, function (error, stdout, stderr) {
-        logFile("mov转MP4完成")
+    process.exec(shellCommand , function (error, stdout, stderr) {
+        logFile('StdOut=' + stdout);
+        logFile('StdErr=' + stderr);
         callback();
     });
 }
@@ -1110,6 +1182,15 @@ function writeStringToTmpFile(string, file) //'\\myOutput.txt'
 {
     var outputFile = pathSeprator() + file
     fs.appendFileSync(TEMP_SOURCE_PATH + outputFile, string + '\n')
+    return TEMP_SOURCE_PATH + outputFile
+}
+
+function writeStringToTmpFileNeedDealPath(string, file, encoding) //'\\myOutput.txt'
+{
+    var outputFile =  pathSeprator() + file
+    var file = TEMP_SOURCE_PATH + outputFile 
+    fs.appendFileSync(file, string + '\n' , encoding)
+    return file
 }
 
 function getBaseLog(isJs) {

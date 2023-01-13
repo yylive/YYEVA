@@ -70,7 +70,7 @@
     color: white
 }
 
-.lowLevelButton,.midLevelButton,.highLevelButton,.customerButton {
+.lowLevelButton,.midLevelButton,.highLevelButton,.customerButton,.autoAlphaButton,.halfAlphaButton,.allAlphaButton {
     width: 100px;
     height: 40px; 
     border-radius: 20px;
