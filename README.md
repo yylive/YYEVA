@@ -51,7 +51,7 @@ https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-
   
 ## 平台支持
 
-+ 支持 [Android](https://github.com/yylive/YYEVA-Android)、[IOS](https://github.com/yylive/YYEVA-iOS)、[Web](https://github.com/yylive/YYEVA-Web)、[微信小程序](https://www.npmjs.com/package/yyeva-wechat) 点击了解详细接入  
++ 支持 [Android](https://github.com/yylive/YYEVA-Android)、[IOS](https://github.com/yylive/YYEVA-iOS)、[Web](https://github.com/yylive/YYEVA-Web)、[微信小程序](https://www.npmjs.com/package/yyeva-wechat) 、[百度小程序](https://github.com/yylive/YYEVA-Web/blob/main/docs/baidu-smart-program.md) 点击了解详细接入  
 + 资源制作的AE插件使用规范 [详情](https://github.com/yylive/YYEVA/tree/main/AEP)
 + 数据结构定义 [详情](https://github.com/yylive/YYEVA/blob/main/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md) 
  
