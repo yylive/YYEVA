@@ -87,7 +87,7 @@ https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-
 
 ## 已接入APP
 
- <img src="https://github.com/yylive/YYEVA/blob/main/img/jieru.png" width = "386" height = "311" alt="图片名称" align=center />
+ <img src="https://github.com/yylive/YYEVA/blob/main/img/jieru.png" width = "1992" height = "296" alt="图片名称" align=center />
  
 
 
