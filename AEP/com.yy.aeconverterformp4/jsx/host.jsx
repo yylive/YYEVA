@@ -121,6 +121,10 @@ var AECompoItemUtils = (function() {
                          alphaLayer = layer1
                     }   
                 }  
+
+                if (alphaLayer != undefined) {
+                    logMessage(" 通过 mov格式 找到 alphaLayer:" + alphaLayer.name)
+                }
         }    
         return alphaLayer
 
@@ -262,7 +266,7 @@ var AECompoItemUtils = (function() {
 
             return true;
         } catch (e) {
-
+                 
         }
     }
     AECompoItemUtils.prototype.findCompoUsedIn = function(compItem,activeItem,arry,matchRule) {
@@ -436,8 +440,14 @@ var DynamicMp4Conveter = (function() {
  
 
         //分析文字/图像遮罩合成
-        var txtMaskInfo = txtCompoItem != undefined ? this.analysisMaskCompo(txtCompoItem) : undefined;
-        var imgMaskInfo = imgCompoItem != undefined ? this.analysisMaskCompo(imgCompoItem) : undefined;
+        try {
+            var txtMaskInfo = txtCompoItem != undefined ? this.analysisMaskCompo(txtCompoItem) : undefined;
+            var imgMaskInfo = imgCompoItem != undefined ? this.analysisMaskCompo(imgCompoItem) : undefined;
+        } catch(e) {
+            logMessage("【ERROR】:analysisMaskCompo catch error")
+            logMessage(e)
+        }
+        
         var maskInfoList = [];
 
         if (imgMaskInfo != undefined) {
@@ -460,8 +470,13 @@ var DynamicMp4Conveter = (function() {
 
         logMessage("analysisMaskCompo complete")
 
-        //获取所有源信息描述
-        var sourceInfos = this.loadMaskSourceInfo(maskInfoList);
+         try {
+            var sourceInfos = this.loadMaskSourceInfo(maskInfoList);
+        } catch(e) {
+            logMessage("【ERROR】:loadMaskSourceInfo catch error")
+            logMessage(e)
+        } 
+        //获取所有源信息描述  
 
         if (sourceInfos.length == 0) {
             logMessage("loadMaskSourceInfo fail:sourceInfos.count == 0");
@@ -1565,22 +1580,11 @@ function nextDeal(){
 function startConverter_Effect(tempPath,alphaAuto) {
   
     var compoItem = app.project.activeItem
-
-    if (checkValidCompItem(compoItem) == false) {
-        return undefined;
-    }
-
-    if (checkHasConverMP4Template(compoItem)==false) {
-        alertMessage("AE模板不正确");
-        logMessage("AE模板不正确");
-        return undefined;
-    } 
-
+ 
     if(checkMaskWidthHeight() == false) { 
         logMessage("mask合成的宽高不符合规范");
         return undefined;
-    }
-  
+    } 
     
     mp4Conveter = new DynamicMp4Conveter(app);
     var json = mp4Conveter.beginConveter(tempPath,alphaAuto)
@@ -1628,26 +1632,13 @@ function checkMaskWidthHeight()
 
 function startConverter_Alpha(aviPath) {
  
-    var compoItem = app.project.activeItem 
-    var valid = checkValidCompItem(compoItem)
- 
-    if (valid == false) { 
-        return undefined;
-    }    
-
-    valid =  checkHasConverMP4Template(compoItem);
-     
-    if (valid == false) { 
-        return undefined;
-    }  
+    var compoItem = app.project.activeItem  
   
     var file = renderQueue(compoItem,aviPath)
- 
-
+  
     var width = compoItem.width;
     var height = compoItem.height;
- 
- 
+  
     var outputJson = {
             "descript": {
                 "width": width,
