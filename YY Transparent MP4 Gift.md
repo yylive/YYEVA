@@ -8,7 +8,7 @@ This document is about my personal understanding of the quite mature implementat
 
 MP4 is an encapsulation format for streaming media. It often uses avc as the encoding method for video track, and aac as the encoding method for audio track.  The color sampling standard used by avc encoding is YUV, which is a Chroma+ Luminance color sampling format that can be converted to RGB by specific formula
 
-```js
+```c++
  MP4 = (Video Track) + (Audio Track) + (Other Track)
 ```
 

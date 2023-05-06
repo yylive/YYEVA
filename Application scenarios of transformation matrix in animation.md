@@ -32,7 +32,7 @@ n x m * m x k = n x k
 
 Assume there is a point(x,y,1）, as we all know, if a point is translated 3 units on the x-axis and 4 units on the y-axis, the result after translations is (x+3,y+4,1). We use the column vector to represent the point . By multiplying the above matrices, we know that we need to construct a 3x3 matrix and left-multiply the column vector to get a new 3x1 column vector. So the formula is as follows
 
-```js
+```c++
   a b c              x                 x+3
 ( d e f )   *      ( y  )     =      ( y+4 )
   g h i              1                  1
@@ -72,7 +72,7 @@ Consider a point (x, y, 1), we know that if a point is scaled 3 times on the x-a
 That formula is as follows
 
 
-```js
+```c++
   a b c              x                  3x 
 ( d e f )   *      ( y  )     =      (  4y )
   g h i              1                  1
@@ -107,7 +107,7 @@ Resulting Matrix:
 
 Consider a point (x, y, 1), as we know, if we rotate b degrees around the point, the result will be shown by the picture below
 
-```js
+```c++
 
 before rotation
 
@@ -147,7 +147,7 @@ so the resulting matrix is (b is the rotation degree)
 Affine transformation is a combination of using the above matrix transformation as a mathematical expression which can be used to left-multiply the point column vector to represent the transformation of the pixel point.
 Note: Left multiplication is generally first scaling, rotating transformation, and then doing translation transformation, for example.
 
-```js
+```c++
   
     Pixel point(3,4,1) -》translated by one unit in the positive direction on the x-axis, and translated by 2 units in the positive direction on the y-axis -》magnified by 2 times on the x-axis, and magnified by 2 times on the y-axis
     
@@ -175,7 +175,7 @@ Note: Left multiplication is generally first scaling, rotating transformation, a
 
 so transformation matrix is expressed as follows
 
-```js
+```c++
                      a 0 dx
 rotated matrix =   ( 0 b dy )
                      0 0 1

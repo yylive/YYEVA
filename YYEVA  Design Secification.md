@@ -112,7 +112,7 @@ After creating the `mask_image` composition, you can create a "image" layer unde
 
 `name` ： anchor_avatar-aspectfit (The name is separated by char '-', and the formant is key - scaleMode)
 
-```js
+```c++
      `key` ： When client-side rendering, index the name of this `mask`
      `scaleMode`  : aspectFill or aspectFill or scaleFill
 ```

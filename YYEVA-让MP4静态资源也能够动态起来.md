@@ -145,7 +145,7 @@
 * 将 步骤3 的数据 用 `zlib` 打包后，使用 `base64` 的方式存储
 * 将生成的 `base64` 数据，封装成如下格式
 * 由于 H5 不会嵌入 `ffmpeg` 库，因此 H5 提取 `Metadata` 段的方式依赖用正则匹配，因此我们的 `Metadata` 数据格式会加上前后缀 `yyeffectmp4json[[base64]]yyeffectmp4json` ,这样可以方便 `H5` 快速定位到 `Metadata` 段的数据
-```js
+```c++
  var templateStart = "yyeffectmp4json[["
  var templateEnd = "]]yyeffectmp4json"
  base64 =  templateStart + base64 + templateEnd

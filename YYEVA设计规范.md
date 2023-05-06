@@ -132,7 +132,7 @@
 
  name: anchor_avatar-aspectfit  以 `-` 符号作为分隔  ,支持的格式为 key-scaleMode 
          
-```js
+```c++
    key:         客户端渲染时，索引该mask的名称
    scaleMode:   图片放缩时的模式
      aspectFill 保持图像的纵横比并将图像缩放成将适合背景定位区域的最大大小。

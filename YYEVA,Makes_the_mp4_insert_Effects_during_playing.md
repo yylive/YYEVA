@@ -67,7 +67,7 @@ After passing the legality verification, the plugin starts parsing the compositi
 * 	Traverse all valid layers in the two major types of pictures and text respectively, and get the affine matrix of each layer in each frame.(matrix).
 *  According to the affine matrix obtained in step 2, the position of each layer in each frame on the canvas can be confirmed.(renderFrame).
 
-```js
+```c++
 The specific calculation method is as follows: (Take a picture layer as an example)
 
 1. Get size of the content in picture AVLayer: layer.width, layer.height
