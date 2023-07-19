@@ -96,8 +96,7 @@ when it is text, it means the text size that needs to be specified when renderin
 	* image type (ffectType ==  img)
 		saleMode: the stretching method when the image is adapted to the display area of ​​the client. There are three types of values.
 
-		1.	scaleFill:
-Don't keep image aspect ratio, surfacing background area, default mode
+		1.	scaleFill: Don't keep image aspect ratio, surfacing background area, default mode
 		2.	aspectFit: Maintain the aspect ratio of the image and scale the image to the smallest size that will completely cover the background positioning area
 		3. 	aspectFill: Maintains the aspect ratio of the image and scales the image to the largest size that will fit in the background positioning area
 
