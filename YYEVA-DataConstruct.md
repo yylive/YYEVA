@@ -12,7 +12,7 @@
 	"descript": {                          //Description of the video
 		"width": 1808,                     //width of the video
 		"height": 1008,                    //height of the video
-			"isEffect": 1,                     //Whether it is a dynamic element video
+		"isEffect": 1,                     //Whether it is a dynamic element video
 		"version": 1,                      //version of plug-in
 		"rgbFrame": [0, 0, 900, 1000],     //Position info of rgb
 		"alphaFrame": [900, 0, 450, 500]   //Position info of alpha area
