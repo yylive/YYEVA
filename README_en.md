@@ -13,7 +13,7 @@ YYEVA（YY Effect Video Animate）is an open source solution that supports MP4 a
  
 Compared with the most commonly used frame-by-frame animation solution, YYEVA has the advantages of higher compression ratio and higher hardware decoding efficiency , moreover, supporting customized business elements insertion.In addition to the animation effects supported by SVGA、Lottie or other solutions, YYEVA supports more special effects: complex 3D effect、strokes、particle effect and so on, making What-You-See-Is-What-You-Get possible. 
 
-YYEVA is a solution further expanded on the basis of the transparent MP4 effect solution, so that it supports not only playing transparent MP4 animation but also  inserting customized elements into the static MP4 resources during runtime.  
+YYEVA is a solution further expanded on the basis of the transparent MP4 effect solution, so that it supports not only playing transparent MP4 animation but also  inserting customized elements into the static MP4 resources during runtime.
 
 
 ## Demonstration
