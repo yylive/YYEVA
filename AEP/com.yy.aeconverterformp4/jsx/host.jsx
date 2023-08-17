@@ -396,6 +396,37 @@ var DynamicMp4Conveter = (function() {
 
             return newOutComp 
     }
+
+    DynamicMp4Conveter.prototype.beginConveterAlpha = function() { 
+        
+        logMessage("beginConveterAlpha begin")  
+        
+        var activeItem = app.project.activeItem
+        
+        //判断有没有convertMP4模板
+         if (activeItem == null || activeItem == undefined) {
+            alertMessage("请选择一个合成");
+            return activeItem;
+        } 
+        needCleanCom = false 
+        var alphaLayer = this.compoItemUtils.findAlphaLayer(activeItem);
+        if (alphaLayer == undefined) { 
+            logMessage("未找到alphaLayer,尝试添加一个AlphaLayer")
+            var newOutComp = this.addSelfAlphaLayer(activeItem) 
+            if (newOutComp == undefined) {
+               alertMessage("Alpha区域创建或添加失败")
+               logMessage("未找到AlphaLayer，且添加一个失败")
+               return activeItem     
+            } 
+            logMessage("添加一个AlphaLayer成功")
+            needCleanCom = true
+            activeItem = newOutComp     
+            return newOutComp
+        }      
+
+        return activeItem
+
+    }
   
     DynamicMp4Conveter.prototype.beginConveter = function(tempPath,alphaAuto) { 
         
@@ -408,6 +439,7 @@ var DynamicMp4Conveter = (function() {
             alertMessage("请选择一个合成");
             return nil;
         } 
+
         needCleanCom = false 
         var alphaLayer = this.compoItemUtils.findAlphaLayer(activeItem);
         if (alphaLayer == undefined) { 
@@ -1551,10 +1583,9 @@ function beginConverter(tempPath,alphaAuto)
 
     if (mode == 1) { //normal
         logMessage("转换模式为:普通透明MP4");
-        var result = startConverter_Alpha(tempPath)
-        var resultJson =  {"mode":1,"data":result}
-         var out = JSON.stringify(resultJson)  
-         return out
+        var result = startConverter_Alpha(tempPath, false)
+
+         return result
     } else if (mode == 2) {  //dynamic
         logMessage("转换模式为: 混合MP4");
         var result = startConverter_Effect(tempPath,alphaAuto)
@@ -1630,14 +1661,36 @@ function checkMaskWidthHeight()
 
 }
 
-function startConverter_Alpha(aviPath) {
+function checkAlphaExist() {
+  var activeItem = app.project.activeItem   
+  mp4Conveter = new DynamicMp4Conveter(app);
+  var alphaLayer = mp4Conveter.compoItemUtils.findAlphaLayer(activeItem);
+  if (alphaLayer == undefined) { 
+    logMessage("不存在alpha");
+
+      return false
+  }  
+
+  return true
+}
+
+function startConverter_Alpha(aviPath, checkAlpha) {
  
-    var compoItem = app.project.activeItem  
-  
+    var compoItem = app.project.activeItem   
+
+    var preItem =  compoItem
+
+    //check 
+    if (checkAlpha) {
+      mp4Conveter = new DynamicMp4Conveter(app);
+      compoItem = mp4Conveter.beginConveterAlpha()
+    }
+   
     var file = renderQueue(compoItem,aviPath)
   
     var width = compoItem.width;
     var height = compoItem.height;
+ 
   
     var outputJson = {
             "descript": {
@@ -1648,18 +1701,23 @@ function startConverter_Alpha(aviPath) {
                 "rgbFrame": [0, 0, width * 0.5, height],
                 "alphaFrame": [width * 0.5, 0, width * 0.5, height],
                 "fps":compoItem.frameRate,
-                "hasAudio":compoItem.hasAudio
+                "hasAudio":compoItem.hasAudio,
+                "effect":[],
+                "datas":[]
             }, 
         };
             var result = {
             "file": file,
             "evaJson": JSON.stringify(outputJson)
-        };
+        };  
+        var json = JSON.stringify(result) 
 
-
-        var json = JSON.stringify(result)
- 
-        return json; 
+        if (compoItem != preItem) {
+            compoItem.remove()
+        }
+        var resultJson =  {"mode":1,"data":json}
+        var out = JSON.stringify(resultJson)  
+        return out; 
 }
 
 
