@@ -893,11 +893,12 @@ function _beginConveterInternal() {
           if (success264 && success265) {
             progress = 1;
             updateProcess(progress);
-            setTimeout(() => {
-              showModalTip(false)
-              alertMessage(successMsg)
-            }, 250);
+            // setTimeout(() => {
+            //     showModalTip(false)
+            //     alertMessage(successMsg)
+            // }, 250);
             logFile('全部完成转换');
+            _checkAndconvertAlpha()
           }
         });
 
