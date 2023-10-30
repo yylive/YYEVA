@@ -41,12 +41,12 @@ https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-
 
 ## YYEVA工具链 工作流程
 
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/ae_timeline.png" width = "754" height = "369" alt="图片名称" align=center />
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/ae_timeline.png" width = "754" alt="图片名称" align=center />
     
 
 ## YYEVA渲染 工作流程
 
-  <img src="https://github.com/yylive/YYEVA/blob/main/img/yyeva_timeline.png" width = "634" height = "322" alt="图片名称" align=center />
+  <img src="https://github.com/yylive/YYEVA/blob/main/img/yyeva_timeline.png" width = "634" alt="图片名称" align=center />
  
   
 ## 平台支持
