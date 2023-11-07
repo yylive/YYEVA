@@ -483,13 +483,8 @@ var DynamicMp4Conveter = (function () {
 
     var maskInfoList = [];
 
-    // if (imgMaskInfo != undefined) {
-    //     maskInfoList = maskInfoList.concat(imgMaskInfo)
-    // }
-
-    // if (txtMaskInfo != undefined) {
-    //     maskInfoList = maskInfoList.concat(txtMaskInfo)
-    // } 
+    var addMaskTextSuccess = false
+    var addMaskImageSuccess = false
     var layerCollection = originItem.layers;
     logMessage("开始分析图层mask区域的顺序:" + layerCollection.length);
     var layerLength = originItem.layers.length;
@@ -501,6 +496,7 @@ var DynamicMp4Conveter = (function () {
           maskInfoList = maskInfoList.concat(txtMaskInfo)
           logMessage(maskInfoList);
           logMessage("成功添加:" + layer.name);
+          addMaskTextSuccess = true;
         }
       }
       if (layer.name.match(MaskCompo_Image)) {
@@ -508,9 +504,20 @@ var DynamicMp4Conveter = (function () {
           maskInfoList = maskInfoList.concat(imgMaskInfo)
           logMessage(maskInfoList);
           logMessage("成功添加:" + layer.name);
+          addMaskImageSuccess = true;
         }
       }
     }
+
+    if (!addMaskImageSuccess && imgMaskInfo != undefined) {
+        maskInfoList = maskInfoList.concat(imgMaskInfo)
+        logMessage("兜底成功添加imgMaskInfo:");
+    }
+
+    if (!addMaskTextSuccess && txtMaskInfo != undefined) {
+        maskInfoList = maskInfoList.concat(txtMaskInfo)
+        logMessage("兜底成功添加txtMaskInfo:");
+    } 
 
     if (txtMaskInfo == undefined && imgMaskInfo == undefined) {
       logMessage("analysisMaskCompo fail")

@@ -958,7 +958,7 @@ function _checkAndconvertAlpha() {
       setTimeout(() => {
         showModalTip(false)
         alertMessage(successMsg)
-        deleteFolder(TEMP_SOURCE_PATH)
+        // deleteFolder(TEMP_SOURCE_PATH)
       }, 250);
       logFile('checkAlphaExist end alpha exist')
       return
@@ -1076,7 +1076,7 @@ function _checkAndconvertAlpha() {
             setTimeout(() => {
               showModalTip(false)
               alertMessage(successMsg)
-              deleteFolder(TEMP_SOURCE_PATH)
+              // deleteFolder(TEMP_SOURCE_PATH)
             }, 250);
             logFile('全部完成转换');
           }
@@ -1256,13 +1256,13 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, callback) {
       params = ' -c:v libx264 -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf format=yuv420p  '
     }
   } else if (encodeType == MP4EnCodeType.hevc) {
-    var params = ' -c:v libx265 -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k  -crf 28 -preset 5  -y -vf format=yuv420p  '
+    var params = ' -c:v libx265 -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 28 -preset 5  -y -vf format=yuv420p  '
     if (level == MP4EnCodeLevel.low) {
-      params = ' -c:v libx265 -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k  -crf 34 -preset 5  -y -vf format=yuv420p  '
+      params = ' -c:v libx265 -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 34 -preset 5  -y -vf format=yuv420p  '
     } else if (level == MP4EnCodeLevel.high) {
-      params = ' -c:v libx265 -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k  -crf 22 -preset 5 -y -vf format=yuv420p  '
+      params = ' -c:v libx265 -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 22 -preset 5 -y -vf format=yuv420p  '
     } else if (level == MP4EnCodeLevel.customer) {
-      params = ' -c:v libx264 -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf format=yuv420p  '
+      params = ' -c:v libx264 -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf format=yuv420p  '
     }
   }
   var aviToMp4Cmd = addPathUpDot(ffmpegPath()) + ' -hide_banner ' + ' -i ' + addPathUpDot(inputFile) + params + addPathUpDot(outFile);
