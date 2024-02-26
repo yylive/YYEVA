@@ -1352,7 +1352,7 @@ function writeStringToTmpFileNeedDealPath(string, file, encoding) //'\\myOutput.
 {
   var outputFile = pathSeprator() + file
   var file = TEMP_SOURCE_PATH + outputFile
-  fs.appendFileSync(file, string + '\n', encoding)
+  fs.writeFileSync(file, string + '\n', encoding)
   return file
 }
 
