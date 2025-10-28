@@ -18,6 +18,7 @@ var copyOutcompoItem
 var outPath
 var needCleanCom = false
 var beginConverterJson = undefined
+var globalLgrcMode = false
 var confirmMessage = function (message) {
   return confirm(message);
 }
@@ -368,8 +369,11 @@ var DynamicMp4Conveter = (function () {
     var layerAnchorPointX = layerPropertyGroup.property("ADBE Position").valueAtTime(0, false)[0];
     var layerAnchorPointY = layerPropertyGroup.property("ADBE Position").valueAtTime(0, false)[1];
 
-    layerPropertyGroup.property("ADBE Position").setValue([layerPositionX, layerPositionY, 0])
-    alphaLayer.property("ADBE Transform Group").property("ADBE Position").setValue([layerPositionX + activeItem.width, layerPositionY, 0])
+    var rgbPadding = globalLgrcMode == 'true' ? activeItem.width : 0;
+    var alphaPadding = globalLgrcMode == 'true' ? 0 : activeItem.width;
+    logMessage("globalLgrcMode:" + typeof globalLgrcMode + globalLgrcMode + ",rgbPadding:" + rgbPadding + ",alphaPadding:" + alphaPadding)
+    layerPropertyGroup.property("ADBE Position").setValue([layerPositionX + rgbPadding, layerPositionY, 0])
+    alphaLayer.property("ADBE Transform Group").property("ADBE Position").setValue([layerPositionX + alphaPadding, layerPositionY, 0])
 
 
     //给alpha区域添加一个效果属性   
@@ -1591,10 +1595,11 @@ function checkMode() {
 }
 
 
-function beginConverter(tempPath, alphaAuto) {
+function beginConverter(tempPath, alphaAuto, lgrcMode) {
   var compoItem = app.project.activeItem
 
   outPath = tempPath
+  globalLgrcMode = lgrcMode
 
   beginConverterJson = undefined
 
@@ -1610,7 +1615,7 @@ function beginConverter(tempPath, alphaAuto) {
 
   if (mode == 1) { //normal
     logMessage("转换模式为:普通透明MP4");
-    var result = startConverter_Alpha(tempPath, false)
+    var result = startConverter_Alpha(tempPath, false, lgrcMode)
 
     return result
   } else if (mode == 2) {  //dynamic
@@ -1700,7 +1705,7 @@ function checkAlphaExist() {
   return true
 }
 
-function startConverter_Alpha(aviPath, checkAlpha) {
+function startConverter_Alpha(aviPath, checkAlpha, lgrcMode) {
 
   var compoItem = app.project.activeItem
 
@@ -1724,8 +1729,8 @@ function startConverter_Alpha(aviPath, checkAlpha) {
       "height": height,
       "isEffect": 0,
       "version": AE_Extension_Version,
-      "rgbFrame": [0, 0, width * 0.5, height],
-      "alphaFrame": [width * 0.5, 0, width * 0.5, height],
+      "alphaFrame": lgrcMode == 'true' ? [0, 0, width * 0.5, height] : [width * 0.5, 0, width * 0.5, height],
+      "rgbFrame": lgrcMode == 'true' ? [width * 0.5, 0, width * 0.5, height] : [0, 0, width * 0.5, height],
       "fps": compoItem.frameRate,
       "hasAudio": compoItem.hasAudio,
       "effect": [],

@@ -813,7 +813,8 @@ function _beginConveterInternal() {
 
     logFile('beginConverter star')
 
-    esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "'," + "'" + alphaRatioLevel + "')").then(out => {
+    var lgrcMode = document.getElementById('lGRCBox').checked;
+    esp.evalScript("beginConverter('" + TEMP_SOURCE_PATH + "'," + "'" + alphaRatioLevel + "'," + "'" + lgrcMode + "')").then(out => {
       progress = 0.5
       updateProcess(progress, "图层解析完毕，开始渲染")
       logFile('beginConverter end')
@@ -964,7 +965,9 @@ function _checkAndconvertAlpha() {
       logFile('checkAlphaExist end alpha exist')
       return
     }
-    esp.evalScript("startConverter_Alpha('" + TEMP_SOURCE_PATH + "'," + "'" + true + "')").then(out => {
+
+    var checkbox = document.getElementById('lGRCBox').checked;
+    esp.evalScript("startConverter_Alpha('" + TEMP_SOURCE_PATH + "'," + "'" + true + "'," + "'" + checkbox + "')").then(out => {
       progress = 0.5
       updateProcess(progress, "图层解析完毕，开始渲染")
       logFile('startConverter_Alpha end')
@@ -1253,6 +1256,7 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, originalWidth, o
   var checkbox = document.getElementById('lowDeviceBox');
   var lowDevice = checkbox.checked
   var profile = ''
+  var vf = "format=yuv420p"
   if (lowDevice) {
     // 原始宽高
     const iw = originalWidth * 2;  // 原始宽度（如1500）
@@ -1289,11 +1293,12 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, originalWidth, o
 
     profile = '-profile:v main -level 3.1'
     logFile(`优化后的宽高: ${scaleW}, ${scaleH}`);
+    vf = `scale=${scaleW}:${scaleH},format=yuv420p`
   }
 
   var params = ''
   if (encodeType == MP4EnCodeType.avc) {
-    var params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 23.5 -preset 5 -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+    var params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 23.5 -preset 5 -y -vf "${vf}"  `
     logFile(`ccm params: ${params}`);
     if (level == MP4EnCodeLevel.low) {
       params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 29.5 -preset 5  -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
