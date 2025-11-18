@@ -1301,20 +1301,20 @@ function convertAviToMP4(inputFile, outFile, level, encodeType, originalWidth, o
     var params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 23.5 -preset 5 -y -vf "${vf}"  `
     logFile(`ccm params: ${params}`);
     if (level == MP4EnCodeLevel.low) {
-      params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 29.5 -preset 5  -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+      params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 29.5 -preset 5  -y -vf "${vf}"  `
     } else if (level == MP4EnCodeLevel.high) {
-      params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 17.5 -preset 5 -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+      params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf 17.5 -preset 5 -y -vf "${vf}"  `
     } else if (level == MP4EnCodeLevel.customer) {
-      params = ` -c:v libx264 -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+      params = ` -c:v libx264 -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3"  -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf "${vf}"  `
     }
   } else if (encodeType == MP4EnCodeType.hevc) {
-    var params = ` -c:v libx265 ${profile} -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 28 -preset 5  -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+    var params = ` -c:v libx265 ${profile} -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 28 -preset 5  -y -vf "${vf}"  `
     if (level == MP4EnCodeLevel.low) {
-      params = ` -c:v libx265 ${profile} -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 34 -preset 5  -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+      params = ` -c:v libx265 ${profile} -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 34 -preset 5  -y -vf "${vf}"  `
     } else if (level == MP4EnCodeLevel.high) {
-      params = ` -c:v libx265 ${profile} -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 22 -preset 5 -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+      params = ` -c:v libx265 ${profile} -x265-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k  -crf 22 -preset 5 -y -vf "${vf}"  `
     } else if (level == MP4EnCodeLevel.customer) {
-      params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf "scale=${scaleW}:${scaleH},format=yuv420p"  `
+      params = ` -c:v libx264 ${profile} -x264-params "me=umh:scenecut=60:ref=4:deblock=1:bframes=3:keyint=300:keyint_min=1:qcomp=0.50:aq-mode=2:aq-strength=0.8:psy_rd=0.3" -vtag hvc1 -c:a aac -b:a 128k -crf ' + customer_crf + '  -preset 5 -y -vf "${vf}"  `
     }
   }
   var aviToMp4Cmd = addPathUpDot(ffmpegPath()) + ' -hide_banner ' + ' -i ' + addPathUpDot(inputFile) + params + addPathUpDot(outFile);
