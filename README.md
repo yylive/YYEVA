@@ -93,6 +93,7 @@ https://user-images.githubusercontent.com/14030762/203515218-f721dc67-15a9-4c40-
 
 ## QQ交流群
 群号： **981738110**
+一群已满，请加二群 **705775146**
 
 ![qqgroup](https://github.com/yylive/YYEVA/blob/main/img/qqgroup.png)
 
